@@ -7,6 +7,10 @@
 GET     /                           controllers.HomeController.index
 GET     /v1/clients                 controllers.HomeController.get
 POST    /v1/clients                 controllers.HomeController.create
+DELETE  /v1/clients/deleteall       controllers.HomeController.deleteall
+DELETE  /v1/clients/delete/:id      controllers.HomeController.delete(id:Int)
+PUT     /v1/clients/getclient/:id   controllers.HomeController.getClient(id:Int)
+PUT     /v1/clients/update/:id      controllers.HomeController.update(id: Int)
 
 
 # Map static resources from the /public folder to the /assets URL path

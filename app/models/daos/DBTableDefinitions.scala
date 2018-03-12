@@ -9,6 +9,16 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
   import profile.api._
   import com.github.tototoshi.slick.PostgresJodaSupport._
 
+  //***************************************************************************************
+//  case class DBClientForUpdate(
+//                       id: Int,
+//                       name: Option[String],
+//                       desc: Option[String],
+//                       expireDate: Option[DateTime],
+//                       createdAt: Option[DateTime],
+//                       updatedAt: Option[DateTime],
+//                       deletedAt: Option[DateTime]
+//                     )
   case class DBClient(
                      id: Int,
                      name: String,
@@ -20,6 +30,10 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
                      ){
     def toClients: Client = Client(id, name, desc, expireDate, createdAt, updatedAt)
     def isExpired: Boolean = DateTime.now().isAfter(expireDate)
+//    def findClientByID(sentID:Int): Option[Any] =
+//    if (sentID ==id) {
+//      Some(Client(id, name, desc, expireDate, createdAt, updatedAt))
+//    }
   }
 
   class Clients(tag: Tag) extends Table[DBClient](tag, "clients"){
@@ -35,4 +49,6 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
   }
 
   val slickClients = TableQuery[Clients]
+
+  //***************************************************************************************
 }

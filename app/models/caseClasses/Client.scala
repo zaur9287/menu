@@ -28,3 +28,31 @@ object Client {
     )
   )
 }
+
+
+
+
+object  ClientForms {
+
+  // client update form
+  case class UpdateClientForm(
+                               name: Option[String],
+                               description: Option[String],
+                               expireDate: Option[DateTime]
+                             ){
+    def tupled = (name, description, expireDate)
+  }
+
+  object UpdateClientForm {
+    implicit val jsonFormat = Json.format[UpdateClientForm]
+  }
+
+  val updateForm = Form(
+    mapping(
+      "name" -> optional(nonEmptyText),
+      "description" -> optional(nonEmptyText),
+      "expireDate" -> optional(nonEmptyText).transform(s => s.map(ds => DateTime.parse(ds)), (d: DateTime) => Some(d.toString))
+    )(UpdateClientForm.apply)(UpdateClientForm.unapply)
+  )
+
+}

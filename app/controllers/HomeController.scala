@@ -1,13 +1,15 @@
 package controllers
 
 import javax.inject._
-import models.caseClasses.Client
+
+import models.caseClasses.ClientForms.UpdateClientForm
+import models.caseClasses.{Client, ClientForms, UpdateClient}
 import models.services.ClientService
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 import play.api.mvc._
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 /**
@@ -52,5 +54,36 @@ class HomeController @Inject()(
       }
     )
   }
+  def delete(id:Int) = Action.async { implicit request=>
+    clientService.delete(id).map( r =>
+      Ok(Json.toJson(r))
+    )
+  }
+  def deleteall = Action.async { implicit request=>
+    clientService.deleteAll.map( r =>
+      Ok(Json.toJson(r))
+    )
+  }
+  def getClient(id:Int) = Action.async{ implicit request=>
+    val test = clientService.findClientByID(id)
+    test.map(
+      j=>Ok(Json.toJson(j))
+    )
+  }
+  def update(id: Int) = Action.async(parse.json){ implicit request=>
+    ClientForms.updateForm.bindFromRequest().fold(
+      formWithErrors => Future(BadRequest(Json.toJson(formWithErrors.errors.map(e => Json.obj("key" -> e.key, "message" -> e.message))))),
+      data => {
+        clientService.update(id, data).map( r =>
+          if(r.isDefined){
+            Ok(Json.toJson(r.get))
+          } else {
+            BadRequest(Json.obj("status" -> "KO", "message" -> "could not create data."))
+          }
+        )
+      }
+    )
+  }
+
 
 }
