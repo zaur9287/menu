@@ -5,54 +5,47 @@ import play.api.data.Forms._
 import play.api.data.Form
 import play.api.libs.json.Json
 
-case class Client(
+case class Country(
                  id: Int,
                  name: String,
                  description: Option[String],
-                 expireDate: DateTime,
                  createdAt: DateTime,
                  updatedAt: DateTime
                  )
 
-object Client {
+object Country {
   import play.api.libs.json.JodaWrites._
   import play.api.libs.json.JodaReads._
 
-  implicit val jsonFormat = Json.format[Client]
+  implicit val jsonFormat = Json.format[Country]
 
   val form = Form(
     tuple(
       "name" -> nonEmptyText,
       "description" -> optional(nonEmptyText),
-      "expireDate" -> text
     )
   )
 }
 
+object  CountryForms {
 
-
-
-object  ClientForms {
-
-  // client update form
-  case class UpdateClientForm(
+  // Country update form
+  case class UpdateCountryForm(
                                name:String,
-                               description: String,
-                               expireDate: String
+                               description: String
                              ){
-    def tupled = (name, description, expireDate)
+    def tupled = (name, description)
   }
 
-  object UpdateClientForm {
-    implicit val jsonFormat = Json.format[UpdateClientForm]
+  object UpdateCountryForm {
+    implicit val jsonFormat = Json.format[UpdateCountryForm]
   }
 
   val updateForm = Form(
     mapping(
       "name" -> text,
-      "description" -> text,
-      "expireDate" ->  text //.transform(s => s.map(ds => DateTime.parse(ds)), (d: DateTime) => Some(d.toString))
-    )(UpdateClientForm.apply)(UpdateClientForm.unapply)
+      "description" -> text
+    )(UpdateCountryForm.apply)(UpdateCountryForm.unapply)
   )
 
 }

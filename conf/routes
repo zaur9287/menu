@@ -4,13 +4,45 @@
 # ~~~~
 
 # An example controller showing a sample home page
-GET     /                           controllers.HomeController.index
-GET     /v1/clients                 controllers.HomeController.get
-POST    /v1/clients                 controllers.HomeController.create
-DELETE  /v1/clients/deleteall       controllers.HomeController.deleteall
-DELETE  /v1/clients/delete/:id      controllers.HomeController.delete(id:Int)
-PUT     /v1/clients/getclient/:id   controllers.HomeController.getClient(id:Int)
-PUT     /v1/clients/update/:id      controllers.HomeController.update(id: Int)
+GET     /                                   controllers.HomeController.index
+
+GET     /v1/clients                         controllers.HomeController.ClientGet
+POST    /v1/clients                         controllers.HomeController.ClientCreate
+DELETE  /v1/clients/deleteall               controllers.HomeController.ClientDeleteAll
+DELETE  /v1/clients/delete/:id              controllers.HomeController.ClientDelete(id:Int)
+DELETE  /v1/clients/pdeleteall              controllers.HomeController.ClientPureDeleteAll
+DELETE  /v1/clients/pdelete/:id             controllers.HomeController.ClientPureDelete(id:Int)
+PUT     /v1/clients/getclient/:id           controllers.HomeController.ClientGetClient(id:Int)
+PUT     /v1/clients/update/:id              controllers.HomeController.ClientUpdate(id: Int)
+
+GET     /v1/companies                         controllers.HomeController.CompanyGet
+POST    /v1/companies                         controllers.HomeController.CompanyCreate
+DELETE  /v1/companies/deleteall               controllers.HomeController.CompanyDeleteAll
+DELETE  /v1/companies/delete/:id              controllers.HomeController.CompanyDelete(id:Int)
+DELETE  /v1/companies/pdeleteall              controllers.HomeController.CompanyPureDeleteAll
+DELETE  /v1/companies/pdelete/:id             controllers.HomeController.CompanyPureDelete(id:Int)
+PUT     /v1/companies/getcompany/:id          controllers.HomeController.CompanyGetCompany(id:Int)
+PUT     /v1/companies/update/:id              controllers.HomeController.CompanyUpdate(id: Int)
+
+GET     /v1/countries                         controllers.HomeController.CountryGet
+POST    /v1/countries                         controllers.HomeController.CountryCreate
+DELETE  /v1/countries/deleteall               controllers.HomeController.CountryDeleteAll
+DELETE  /v1/countries/delete/:id              controllers.HomeController.CountryDelete(id:Int)
+DELETE  /v1/countries/pdeleteall              controllers.HomeController.CountryPureDeleteAll
+DELETE  /v1/countries/pdelete/:id             controllers.HomeController.CountryPureDelete(id:Int)
+PUT     /v1/countries/getcountry/:id          controllers.HomeController.CountryGetCountry(id:Int)
+PUT     /v1/countries/update/:id              controllers.HomeController.CountryUpdate(id: Int)
+
+GET     /v1/contacts                         controllers.HomeController.ContactGet
+GET     /v1/contacts/:id                     controllers.HomeController.ContactGetByClientID(id:Int)
+POST    /v1/contacts                         controllers.HomeController.ContactCreate
+DELETE  /v1/contacts/deleteall               controllers.HomeController.ContactDeleteAll
+DELETE  /v1/contacts/delete/:id              controllers.HomeController.ContactDelete(id:Int)
+DELETE  /v1/contacts/pdeleteall              controllers.HomeController.ContactPureDeleteAll
+DELETE  /v1/contacts/pdelete/:id             controllers.HomeController.ContactPureDelete(id:Int)
+PUT     /v1/contacts/getcontact/:id          controllers.HomeController.ContactGetContact(id:Int)
+PUT     /v1/contacts/update/:id              controllers.HomeController.ContactUpdate(id: Int)
+
 
 
 # Map static resources from the /public folder to the /assets URL path

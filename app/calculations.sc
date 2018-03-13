@@ -1,9 +1,29 @@
 import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
+
 import scala.collection.mutable.Map
 import scala.collection.mutable.ListMap
 
 val tupletest = (1, "elnur", "Zaur", 5.00f)
-DateTime.now().toString()
+val testDate = DateTime.now().toString()
+
+val myTestDate = DateTime.parse(testDate).toDateTime()
+myTestDate
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 val mymap:Map[String,String] =
   Map(
