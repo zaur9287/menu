@@ -43,6 +43,17 @@ DELETE  /v1/contacts/pdelete/:id             controllers.ContactController.Conta
 PUT     /v1/contacts/getcontact/:id          controllers.ContactController.ContactGetContact(id:Int)
 PUT     /v1/contacts/update/:id              controllers.ContactController.ContactUpdate(id: Int)
 
+GET     /v1/interfaces                         controllers.InterfaceController.interfaceGet
+POST    /v1/interfaces                         controllers.InterfaceController.interfaceCreate
+DELETE  /v1/interfaces/deleteall               controllers.InterfaceController.interfaceDeleteAll
+DELETE  /v1/interfaces/delete/:id              controllers.InterfaceController.interfaceDelete(id:Int)
+DELETE  /v1/interfaces/pdeleteall              controllers.InterfaceController.interfacePureDeleteAll
+DELETE  /v1/interfaces/pdelete/:id             controllers.InterfaceController.interfacePureDelete(id:Int)
+PUT     /v1/interfaces/getinterface/:id        controllers.InterfaceController.interfaceGetInterface(id:Int)
+PUT     /v1/interfaces/update/:id              controllers.InterfaceController.interfaceUpdate(id: Int)
+
+
+
 
 
 # Map static resources from the /public folder to the /assets URL path

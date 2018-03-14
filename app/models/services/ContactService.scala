@@ -3,7 +3,7 @@ package models.services
 import com.google.inject.ImplementedBy
 import javax.inject.Inject
 
-import models.caseClasses.Contact
+import models.caseClasses.{Client, Contact}
 import models.caseClasses.ContactForms.UpdateContactForm
 import models.daos.ContactsDAO
 
@@ -20,7 +20,7 @@ trait ContactService {
   def deleteAll                         :Future[Int]
   def update(id: Int, updateContactForm :UpdateContactForm):Future[Option[Contact]]
   def findContactByID(id: Int)          :Future[Option[Contact]]
-  def findContactByClientID(id: Int)    :Future[Seq[Contact]]
+  def findContactByClientID(id: Int)    :Future[Option[(Client, Seq[Contact])]]
 }
 
 class ContactServiceImpl @Inject()(contactsDAO: ContactsDAO) extends ContactService {
@@ -36,7 +36,7 @@ class ContactServiceImpl @Inject()(contactsDAO: ContactsDAO) extends ContactServ
   override def deleteAll: Future[Int]                                           = contactsDAO.deleteAll
   override def update(id: Int, updateContactForm: UpdateContactForm): Future[Option[Contact]] = contactsDAO.update(id, updateContactForm)
   override def findContactByID(id:Int):Future[Option[Contact]]                  = contactsDAO.findContactByID(id)
-  override def findContactByClientID(id:Int):Future[Seq[Contact]]               = contactsDAO.findContactByClientID(id)
+  override def findContactByClientID(id:Int):Future[Option[(Client, Seq[Contact])]]= contactsDAO.findContactByClientID(id)
   override def pureDelete(id:Int):Future[Int]                                   = contactsDAO.pureDelete(id)
   override def pureDeleteAll:Future[Int]                                        = contactsDAO.pureDeleteAll
 }

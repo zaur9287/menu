@@ -1,6 +1,6 @@
 package models.daos
 
-import models.caseClasses.{Client,Company,Country,Contact}
+import models.caseClasses.{Client,Company,Country,Contact,Interface}
 import org.joda.time.DateTime
 import play.api.db.slick.HasDatabaseConfigProvider
 import slick.jdbc.PostgresProfile
@@ -114,5 +114,32 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
   }
 
   val slickCountries = TableQuery[Countries]
+
+  //**************Interface table***************************************************************************************
+  case class DBInterface(
+                        id: Int,
+                        name: String,
+                        desc: Option[String],
+                        createdAt: DateTime,
+                        updatedAt: DateTime,
+                        deletedAt: Option[DateTime]
+                      ){
+    def toInterfaces: Interface= Interface(id, name, desc, createdAt, updatedAt)
+  }
+
+  class Interfaces(tag: Tag) extends Table[DBInterface](tag, "interfaces"){
+    def id              = column[Int]("id", O.PrimaryKey, O.AutoInc)
+    def name            = column[String]("name")
+    def desc            = column[Option[String]]("description")
+    def created_at      = column[DateTime]("created_at")
+    def updated_at      = column[DateTime]("updated_at")
+    def deleted_at      = column[Option[DateTime]]("deleted_at")
+
+    override def * = (id, name, desc, created_at, updated_at, deleted_at) <> (DBInterface.tupled, DBInterface.unapply)
+  }
+
+  val slickInterfaces = TableQuery[Interfaces]
+
+
 
 }
