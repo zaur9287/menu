@@ -1,10 +1,8 @@
 package models.daos
 
 import org.joda.time.DateTime
-
-
 import com.google.inject.{ImplementedBy, Inject}
-import models.caseClasses.Contact
+import models.caseClasses.{Client, Contact}
 import models.caseClasses.ContactForms.UpdateContactForm
 import play.api.db.slick.DatabaseConfigProvider
 
@@ -20,7 +18,7 @@ trait ContactsDAO {
   def deleteAll: Future[Int]
   def update(id:Int,updateselectAllContactsForm: UpdateContactForm): Future[Option[Contact]]
   def findContactByID(id: Int): Future[Option[Contact]]
-  def findContactByClientID(id: Int): Future[Seq[Contact]]
+  def findContactByClientID(id: Int): Future[Option[(Client, Seq[Contact])]]
 }
 
 class ContactsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)  extends ContactsDAO with DBTableDefinitions {
@@ -75,9 +73,23 @@ class ContactsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigP
     db.run(query.headOption).map(_.map(_.toContacts))
   }
 //client id-yə görə contact-larin tapılması
-  override def findContactByClientID(id:Int): Future[Seq[Contact]] = {
-    val query = slickContacts.filter(f=>f.client_id === id && f.deleted_at.isEmpty).result
-    db.run(query).map(_.map(r=>r.toContacts))
+  override def findContactByClientID(id:Int): Future[Option[(Client, Seq[Contact])]] = {
+    val query = slickClients.filter(c => c.id === id && c.deleted_at.isEmpty)
+      .joinLeft(slickContacts.filter(_.deleted_at.isEmpty)).on(_.id === _.client_id)
+
+    for {
+      clientAndContacts <- db.run(query.result)
+    } yield {
+      val contacts = clientAndContacts.map(_._2).flatten.map(_.toContacts)
+      if(clientAndContacts.length > 0){
+        Some(clientAndContacts.head._1.toClients, contacts)
+      } else {
+        None
+      }
+    }
+
+//    val query = slickContacts.filter(f=>f.client_id === id && f.deleted_at.isEmpty).result
+//    db.run(query).map(_.map(r=>r.toContacts))
   }
 //id-yə görə birinin silinməsi (bazada silinmə tarixinin update olunması)
   override def pureDelete(id:Int): Future[Int] = {
