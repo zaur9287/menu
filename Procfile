@@ -1,0 +1,1 @@
+web: target/universal/stage/bin/qmeter -Dhttp.port=${PORT} -Ddb.playDB.migration.auto=true -Ddb.playDB.url=${DATABASE_URL} -Dslick.dbs.default.db.url=${JDBC_DATABASE_URL} -Dslick.dbs.default.db.user=${DATABASE_USERNAME} -Dslick.dbs.default.db.password=${DATABASE_PASSWORD} -Dconfig.resource=prod.conf
