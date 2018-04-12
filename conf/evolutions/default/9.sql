@@ -3,10 +3,11 @@
 # --- !Ups
 
 CREATE TABLE passwordinfo (
-    hasher          VARCHAR NOT NULL,
-    password        VARCHAR NOT NULL,
-    salt            VARCHAR,
-    loginInfoId     BIGINT NOT NULL
+  id            BIGSERIAL PRIMARY KEY NOT NULL,
+  logininfo_id  BIGINT NOT NULL,
+  hasher        VARCHAR NOT NULL,
+  password      VARCHAR NOT NULL,
+  salt          VARCHAR
 );
 
 # --- !Downs

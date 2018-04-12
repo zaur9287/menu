@@ -2,9 +2,6 @@ package controllers
 
 import javax.inject._
 
-
-import org.joda.time.DateTime
-import play.api.libs.json.Json
 import play.api.mvc._
 
 /**
@@ -13,7 +10,7 @@ import play.api.mvc._
   */
 @Singleton
 class HomeController @Inject()(
-                                cc: ControllerComponents
+                                cc: ControllerComponents,
                               ) extends AbstractController(cc) {
 
   /**

@@ -2,11 +2,13 @@ package controllers
 
 import javax.inject._
 
-import models.caseClasses.{Country,CountryForms}
+import com.mohiva.play.silhouette.api.Silhouette
+import models.caseClasses.{Country, CountryForms}
 import models.services.CountryService
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 import play.api.mvc._
+import utils.auth.DefaultEnv
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -18,7 +20,8 @@ import scala.concurrent.Future
 @Singleton
 class CountryController @Inject()(
                                 cc: ControllerComponents,
-                                countryService:CountryService
+                                countryService:CountryService,
+                                silhouette: Silhouette[DefaultEnv]
                               ) extends AbstractController(cc) {
 
   /**
@@ -30,13 +33,11 @@ class CountryController @Inject()(
     */
 
   //***********************************************************************Country operations
-  def CountryGet = Action.async { implicit request =>
-    countryService.get.map(r =>
-      Ok(Json.toJson(r))
-    )
+  def CountryGet = silhouette.SecuredAction.async { implicit request =>
+    countryService.get.map(r => Ok(Json.toJson(r)))
   }
 
-  def CountryCreate = Action.async(parse.json){ implicit request =>
+  def CountryCreate = silhouette.SecuredAction.async(parse.json){ implicit request =>
     Country.form.bindFromRequest().fold(
       formWithErrors => Future(BadRequest(Json.toJson(formWithErrors.errors.map(e => Json.obj("key" -> e.key, "message" -> e.message))))),
       data => {
@@ -51,23 +52,16 @@ class CountryController @Inject()(
       }
     )
   }
-  def CountryDelete(id:Int) = Action.async { implicit request=>
-    countryService.delete(id).map( r =>
-      Ok(Json.toJson(r))
-    )
+  def CountryDelete(id:Int) = silhouette.SecuredAction.async { implicit request=>
+    countryService.delete(id).map( r => Ok(Json.obj("result"->r)))
   }
-  def CountryDeleteAll = Action.async { implicit request=>
-    countryService.deleteAll.map( r =>
-      Ok(Json.toJson(r))
-    )
+  def CountryDeleteAll = silhouette.SecuredAction.async { implicit request=>
+    countryService.deleteAll.map( r => Ok(Json.obj("result"->r)))
   }
-  def CountryGetCountry(id:Int) = Action.async{ implicit request=>
-    val test = countryService.findCountryByID(id)
-    test.map(
-      j=>Ok(Json.toJson(j))
-    )
+  def CountryGetCountry(id:Int) = silhouette.SecuredAction.async{ implicit request=>
+    countryService.findCountryByID(id).map(j=>Ok(Json.toJson(j)))
   }
-  def CountryUpdate(id: Int) = Action.async(parse.json){ implicit request=>
+  def CountryUpdate(id: Int) = silhouette.SecuredAction.async(parse.json){ implicit request=>
     CountryForms.updateForm.bindFromRequest().fold(
       formWithErrors => Future(BadRequest(Json.toJson(formWithErrors.errors.map(e => Json.obj("key" -> e.key, "message" -> e.message))))),
       data => {
@@ -82,17 +76,11 @@ class CountryController @Inject()(
     )
   }
 
-  def CountryPureDelete(id:Int) = Action.async{ implicit request=>
-    val test = countryService.pureDelete(id)
-    test.map(
-      j=>Ok(Json.toJson(j))
-    )
+  def CountryPureDelete(id:Int) = silhouette.SecuredAction.async{ implicit request=>
+    countryService.pureDelete(id).map(j=>Ok(Json.obj("result"->j)))
   }
-  def CountryPureDeleteAll = Action.async{ implicit request=>
-    val test = countryService.pureDeleteAll
-    test.map(
-      j=>Ok(Json.toJson(j))
-    )
+  def CountryPureDeleteAll = silhouette.SecuredAction.async{ implicit request=>
+    countryService.pureDeleteAll.map(j=>Ok(Json.obj("result"->j)))
   }
 
 

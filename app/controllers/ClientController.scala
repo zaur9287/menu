@@ -2,11 +2,13 @@ package controllers
 
 import javax.inject._
 
-import models.caseClasses.{Client,ClientForms}
+import com.mohiva.play.silhouette.api.Silhouette
+import models.caseClasses.{Client, ClientForms}
 import models.services.ClientService
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 import play.api.mvc._
+import utils.auth.DefaultEnv
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -18,7 +20,8 @@ import scala.concurrent.Future
 @Singleton
 class ClientController @Inject()(
                                 cc: ControllerComponents,
-                                clientService: ClientService
+                                clientService: ClientService,
+                                silhouette: Silhouette[DefaultEnv]
                               ) extends AbstractController(cc) {
 
   /**
@@ -28,19 +31,17 @@ class ClientController @Inject()(
     * will be called when the application receives a `GET` request with
     * a path of `/`.
     */
-  def index() = Action { implicit request: Request[AnyContent] =>
+  def index() = silhouette.SecuredAction { implicit request: Request[AnyContent] =>
     Ok(views.html.index())
   }
 
 
   //***********************************************************************Client operations
-  def ClientGet = Action.async { implicit request =>
-    clientService.get.map(r =>
-      Ok(Json.toJson(r))
-    )
+  def ClientGet = silhouette.SecuredAction.async { implicit request =>
+    clientService.get.map(r => Ok(Json.toJson(r)))
   }
 
-  def ClientCreate = Action.async(parse.json){ implicit request =>
+  def ClientCreate = silhouette.SecuredAction.async(parse.json){ implicit request =>
     Client.form.bindFromRequest().fold(
       formWithErrors => Future(BadRequest(Json.toJson(formWithErrors.errors.map(e => Json.obj("key" -> e.key, "message" -> e.message))))),
       data => {
@@ -55,23 +56,18 @@ class ClientController @Inject()(
       }
     )
   }
-  def ClientDelete(id:Int) = Action.async { implicit request=>
+  def ClientDelete(id:Int) = silhouette.SecuredAction.async { implicit request=>
     clientService.delete(id).map( r =>
       Ok(Json.toJson(r))
     )
   }
-  def ClientDeleteAll = Action.async { implicit request=>
-    clientService.deleteAll.map( r =>
-      Ok(Json.toJson(r))
-    )
+  def ClientDeleteAll = silhouette.SecuredAction.async { implicit request=>
+    clientService.deleteAll.map( r => Ok(Json.obj("result"->r)))
   }
-  def ClientGetClient(id:Int) = Action.async{ implicit request=>
-    val test = clientService.findClientByID(id)
-    test.map(
-      j=>Ok(Json.toJson(j))
-    )
+  def ClientGetClient(id:Int) = silhouette.SecuredAction.async{ implicit request=>
+    clientService.findClientByID(id).map(j=>Ok(Json.toJson(j)))
   }
-  def ClientUpdate(id: Int) = Action.async(parse.json){ implicit request=>
+  def ClientUpdate(id: Int) = silhouette.SecuredAction.async(parse.json){ implicit request=>
     ClientForms.updateForm.bindFromRequest().fold(
       formWithErrors => Future(BadRequest(Json.toJson(formWithErrors.errors.map(e => Json.obj("key" -> e.key, "message" -> e.message))))),
       data => {
@@ -86,16 +82,10 @@ class ClientController @Inject()(
     )
   }
 
-  def ClientPureDelete(id:Int) = Action.async{ implicit request=>
-    val test = clientService.pureDelete(id)
-    test.map(
-      j=>Ok(Json.toJson(j))
-    )
+  def ClientPureDelete(id:Int) = silhouette.SecuredAction.async{ implicit request=>
+    clientService.pureDelete(id).map(j=>Ok(Json.obj("result"->j)))
   }
-  def ClientPureDeleteAll = Action.async{ implicit request=>
-    val test = clientService.pureDeleteAll
-    test.map(
-      j=>Ok(Json.toJson(j))
-    )
+  def ClientPureDeleteAll = silhouette.SecuredAction.async{ implicit request=>
+    clientService.pureDeleteAll.map(j=>Ok(Json.obj("result"->j)))
   }
 }

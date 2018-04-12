@@ -1,12 +1,10 @@
-# Users schema
+# Interfaces schema
 
 # --- !Ups
 
-CREATE TABLE users (
-    userID          VARCHAR NOT NULL PRIMARY KEY,
-    fullName        VARCHAR,
-    email           VARCHAR,
-    avatarURL       VARCHAR,
+CREATE TABLE interfaces (
+    id              BIGSERIAL NOT NULL,
+    name            VARCHAR(255) NOT NULL,
     description     VARCHAR(255),
     created_at      TIMESTAMP WITH TIME ZONE NOT NULL,
     updated_at      TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -15,5 +13,4 @@ CREATE TABLE users (
 
 # --- !Downs
 
-DROP TABLE users;
-
+DROP TABLE interfaces;

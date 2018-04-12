@@ -2,11 +2,13 @@ package controllers
 
 import javax.inject._
 
-import models.caseClasses.{Contact,ContactForms}
-import models.services.{ContactService}
+import com.mohiva.play.silhouette.api.Silhouette
+import models.caseClasses.{Contact, ContactForms}
+import models.services.ContactService
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 import play.api.mvc._
+import utils.auth.DefaultEnv
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -18,7 +20,8 @@ import scala.concurrent.Future
 @Singleton
 class ContactController @Inject()(
                                 cc: ControllerComponents,
-                                contactService: ContactService
+                                contactService: ContactService,
+                                silhouette: Silhouette[DefaultEnv]
                               ) extends AbstractController(cc) {
 
   /**
@@ -28,20 +31,18 @@ class ContactController @Inject()(
     * will be called when the application receives a `GET` request with
     * a path of `/`.
     */
-  def index() = Action { implicit request: Request[AnyContent] =>
+  def index() = silhouette.SecuredAction { implicit request: Request[AnyContent] =>
     Ok(views.html.index())
   }
 
 
 
   //***********************************************************************Client contact operations
-  def ContactGet = Action.async { implicit request =>
-    contactService.get.map(r =>
-      Ok(Json.toJson(r))
-    )
+  def ContactGet = silhouette.SecuredAction.async { implicit request =>
+    contactService.get.map(r => Ok(Json.toJson(r)))
   }
 
-  def ContactCreate = Action.async(parse.json){ implicit request =>
+  def ContactCreate = silhouette.SecuredAction.async(parse.json){ implicit request =>
     Contact.form.bindFromRequest().fold(
       formWithErrors => Future(BadRequest(Json.toJson(formWithErrors.errors.map(e => Json.obj("key" -> e.key, "message" -> e.message))))),
       data => {
@@ -56,29 +57,19 @@ class ContactController @Inject()(
       }
     )
   }
-  def ContactDelete(id:Int) = Action.async { implicit request=>
-    contactService.delete(id).map( r =>
-      Ok(Json.toJson(r))
-    )
+  def ContactDelete(id:Int) = silhouette.SecuredAction.async { implicit request=>
+    contactService.delete(id).map( r => Ok(Json.obj("result"->r)))
   }
-  def ContactDeleteAll = Action.async { implicit request=>
-    contactService.deleteAll.map( r =>
-      Ok(Json.toJson(r))
-    )
+  def ContactDeleteAll = silhouette.SecuredAction.async { implicit request=>
+    contactService.deleteAll.map( r => Ok(Json.obj("result"->r)))
   }
-  def ContactGetContact(id:Int) = Action.async{ implicit request=>
-    val test = contactService.findContactByID(id)
-    test.map(
-      j=>Ok(Json.toJson(j))
-    )
+  def ContactGetContact(id:Int) = silhouette.SecuredAction.async{ implicit request=>
+    contactService.findContactByID(id).map(j=>Ok(Json.toJson(j)))
   }
-  def ContactGetByClientID(id:Int) = Action.async{ implicit request=>
-    val test = contactService.findContactByClientID(id)
-    test.map(
-      j=>Ok(Json.toJson(j))
-    )
+  def ContactGetByClientID(id:Int) = silhouette.SecuredAction.async{ implicit request=>
+    contactService.findContactByClientID(id).map(j=>Ok(Json.toJson(j)))
   }
-  def ContactUpdate(id: Int) = Action.async(parse.json){ implicit request=>
+  def ContactUpdate(id: Int) = silhouette.SecuredAction.async(parse.json){ implicit request=>
     ContactForms.updateForm.bindFromRequest().fold(
       formWithErrors => Future(BadRequest(Json.toJson(formWithErrors.errors.map(e => Json.obj("key" -> e.key, "message" -> e.message))))),
       data => {
@@ -93,17 +84,11 @@ class ContactController @Inject()(
     )
   }
 
-  def ContactPureDelete(id:Int) = Action.async{ implicit request=>
-    val test = contactService.pureDelete(id)
-    test.map(
-      j=>Ok(Json.toJson(j))
-    )
+  def ContactPureDelete(id:Int) = silhouette.SecuredAction.async{ implicit request=>
+    contactService.pureDelete(id).map(j=>Ok(Json.obj("result"->j)))
   }
-  def ContactPureDeleteAll = Action.async{ implicit request=>
-    val test = contactService.pureDeleteAll
-    test.map(
-      j=>Ok(Json.toJson(j))
-    )
+  def ContactPureDeleteAll = silhouette.SecuredAction.async{ implicit request=>
+    contactService.pureDeleteAll.map(j=>Ok(Json.obj("result"->j)))
   }
 
 }

@@ -1,12 +1,14 @@
-# userlogininfo schema
+# logininfo schema
 
 # --- !Ups
 
-CREATE TABLE userlogininfo (
-    userID             VARCHAR NOT NULL,
-    loginInfoId        BIGINT NOT NULL
+CREATE TABLE logininfo (
+    id                  BIGSERIAL PRIMARY KEY NOT NULL,
+    providerid          VARCHAR NOT NULL,
+    providerkey         VARCHAR NOT NULL,
+    userid              VARCHAR NOT NULL
 );
 
 # --- !Downs
 
-DROP TABLE userlogininfo;
+DROP TABLE logininfo;

@@ -2,11 +2,13 @@ package controllers
 
 import javax.inject._
 
+import com.mohiva.play.silhouette.api.Silhouette
 import models.caseClasses.{Interface, InterfaceForms}
 import models.services.InterfaceService
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 import play.api.mvc._
+import utils.auth.DefaultEnv
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -18,7 +20,8 @@ import scala.concurrent.Future
 @Singleton
 class InterfaceController @Inject()(
                                 cc: ControllerComponents,
-                                interfaceService: InterfaceService
+                                interfaceService: InterfaceService,
+                                silhouette: Silhouette[DefaultEnv]
                               ) extends AbstractController(cc) {
 
   /**
@@ -28,19 +31,13 @@ class InterfaceController @Inject()(
     * will be called when the application receives a `GET` request with
     * a path of `/`.
     */
-  def index() = Action { implicit request: Request[AnyContent] =>
-    Ok(views.html.index())
-  }
-
 
   //***********************************************************************interface operations
-  def interfaceGet = Action.async { implicit request =>
-    interfaceService.get.map(r =>
-      Ok(Json.toJson(r))
-    )
+  def interfaceGet = silhouette.SecuredAction.async { implicit request =>
+    interfaceService.get.map(r => Ok(Json.toJson(r)))
   }
 
-  def interfaceCreate = Action.async(parse.json){ implicit request =>
+  def interfaceCreate = silhouette.SecuredAction.async(parse.json){ implicit request =>
     Interface.form.bindFromRequest().fold(
       formWithErrors => Future(BadRequest(Json.toJson(formWithErrors.errors.map(e => Json.obj("key" -> e.key, "message" -> e.message))))),
       data => {
@@ -55,23 +52,16 @@ class InterfaceController @Inject()(
       }
     )
   }
-  def interfaceDelete(id:Int) = Action.async { implicit request=>
-    interfaceService.delete(id).map( r =>
-      Ok(Json.toJson(r))
-    )
+  def interfaceDelete(id:Int) = silhouette.SecuredAction.async { implicit request=>
+    interfaceService.delete(id).map( r => Ok(Json.obj("result"->r)))
   }
-  def interfaceDeleteAll = Action.async { implicit request=>
-    interfaceService.deleteAll.map( r =>
-      Ok(Json.toJson(r))
-    )
+  def interfaceDeleteAll = silhouette.SecuredAction.async { implicit request=>
+    interfaceService.deleteAll.map( r => Ok(Json.obj("result"->r)))
   }
-  def interfaceGetInterface(id:Int) = Action.async{ implicit request=>
-    val test = interfaceService.findInterfaceByID(id)
-    test.map(
-      j=>Ok(Json.toJson(j))
-    )
+  def interfaceGetInterface(id:Int) = silhouette.SecuredAction.async{ implicit request=>
+    interfaceService.findInterfaceByID(id).map(j=>Ok(Json.toJson(j)))
   }
-  def interfaceUpdate(id: Int) = Action.async(parse.json){ implicit request=>
+  def interfaceUpdate(id: Int) = silhouette.SecuredAction.async(parse.json){ implicit request=>
     InterfaceForms.updateForm.bindFromRequest().fold(
       formWithErrors => Future(BadRequest(Json.toJson(formWithErrors.errors.map(e => Json.obj("key" -> e.key, "message" -> e.message))))),
       data => {
@@ -86,16 +76,10 @@ class InterfaceController @Inject()(
     )
   }
 
-  def interfacePureDelete(id:Int) = Action.async{ implicit request=>
-    val test = interfaceService.pureDelete(id)
-    test.map(
-      j=>Ok(Json.toJson(j))
-    )
+  def interfacePureDelete(id:Int) = silhouette.SecuredAction.async{ implicit request=>
+    interfaceService.pureDelete(id).map(j=>Ok(Json.obj("result"->j)))
   }
-  def interfacePureDeleteAll = Action.async{ implicit request=>
-    val test = interfaceService.pureDeleteAll
-    test.map(
-      j=>Ok(Json.toJson(j))
-    )
+  def interfacePureDeleteAll = silhouette.SecuredAction.async{ implicit request=>
+    interfaceService.pureDeleteAll.map(j=>Ok(Json.obj("result"->j)))
   }
 }

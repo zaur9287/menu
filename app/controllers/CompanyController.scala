@@ -2,11 +2,13 @@ package controllers
 
 import javax.inject._
 
-import models.caseClasses.{Company,CompanyForms}
-import models.services.{CompanyService}
+import com.mohiva.play.silhouette.api.Silhouette
+import models.caseClasses.{Company, CompanyForms}
+import models.services.CompanyService
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 import play.api.mvc._
+import utils.auth.DefaultEnv
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -18,7 +20,8 @@ import scala.concurrent.Future
 @Singleton
 class CompanyController @Inject()(
                                 cc: ControllerComponents,
-                                companyService:CompanyService
+                                companyService:CompanyService,
+                                silhouette: Silhouette[DefaultEnv]
                               ) extends AbstractController(cc) {
 
   /**
@@ -28,20 +31,13 @@ class CompanyController @Inject()(
     * will be called when the application receives a `GET` request with
     * a path of `/`.
     */
-  def index() = Action { implicit request: Request[AnyContent] =>
-    Ok(views.html.index())
-  }
-
-
 
   //***********************************************************************Company operations
-  def CompanyGet = Action.async { implicit request =>
-    companyService.get.map(r =>
-      Ok(Json.toJson(r))
-    )
+  def CompanyGet = silhouette.SecuredAction.async { implicit request =>
+    companyService.get.map(r => Ok(Json.toJson(r)))
   }
 
-  def CompanyCreate = Action.async(parse.json){ implicit request =>
+  def CompanyCreate = silhouette.SecuredAction.async(parse.json){ implicit request =>
     Company.form.bindFromRequest().fold(
       formWithErrors => Future(BadRequest(Json.toJson(formWithErrors.errors.map(e => Json.obj("key" -> e.key, "message" -> e.message))))),
       data => {
@@ -56,23 +52,16 @@ class CompanyController @Inject()(
       }
     )
   }
-  def CompanyDelete(id:Int) = Action.async { implicit request=>
-    companyService.delete(id).map( r =>
-      Ok(Json.toJson(r))
-    )
+  def CompanyDelete(id:Int) = silhouette.SecuredAction.async { implicit request=>
+    companyService.delete(id).map( r => Ok(Json.obj("result"->r)))
   }
-  def CompanyDeleteAll = Action.async { implicit request=>
-    companyService.deleteAll.map( r =>
-      Ok(Json.toJson(r))
-    )
+  def CompanyDeleteAll = silhouette.SecuredAction.async { implicit request=>
+    companyService.deleteAll.map( r => Ok(Json.obj("result"->r)))
   }
-  def CompanyGetCompany(id:Int) = Action.async{ implicit request=>
-    val test = companyService.findCompanyByID(id)
-    test.map(
-      j=>Ok(Json.toJson(j))
-    )
+  def CompanyGetCompany(id:Int) = silhouette.SecuredAction.async{ implicit request=>
+    companyService.findCompanyByID(id).map(j=>Ok(Json.toJson(j)))
   }
-  def CompanyUpdate(id: Int) = Action.async(parse.json){ implicit request=>
+  def CompanyUpdate(id: Int) = silhouette.SecuredAction.async(parse.json){ implicit request=>
     CompanyForms.updateForm.bindFromRequest().fold(
       formWithErrors => Future(BadRequest(Json.toJson(formWithErrors.errors.map(e => Json.obj("key" -> e.key, "message" -> e.message))))),
       data => {
@@ -87,17 +76,11 @@ class CompanyController @Inject()(
     )
   }
 
-  def CompanyPureDelete(id:Int) = Action.async{ implicit request=>
-    val test = companyService.pureDelete(id)
-    test.map(
-      j=>Ok(Json.toJson(j))
-    )
+  def CompanyPureDelete(id:Int) = silhouette.SecuredAction.async{ implicit request=>
+    companyService.pureDelete(id).map(j=>Ok(Json.obj("result"->j)))
   }
-  def CompanyPureDeleteAll = Action.async{ implicit request=>
-    val test = companyService.pureDeleteAll
-    test.map(
-      j=>Ok(Json.toJson(j))
-    )
+  def CompanyPureDeleteAll = silhouette.SecuredAction.async{ implicit request=>
+    companyService.pureDeleteAll.map(j=>Ok(Json.obj("result"->j)))
   }
 
 }
