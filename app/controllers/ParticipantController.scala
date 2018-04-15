@@ -31,7 +31,8 @@ class ParticipantController @Inject()(
       formWithErrors => Future(BadRequest(Json.toJson(formWithErrors.errors.map(e => Json.obj("key" -> e.key, "message" -> e.message))))),
       data => {
         var phone=data.phone
-        if (phone.take(1)=="+") phone= phone.replace(phone.take(1),"00")
+        if (phone.take(1)=="+")                           phone = phone.replace(phone.take(1),"00")
+        if (phone.take(2) == "05" || phone.take(2)=="07") phone = "00994"+phone.slice(1,2)
 
         thisService.create(Participant(0, data.name,phone,data.company,data.categoryID, DateTime.now(), DateTime.now(),None))
           .map( r =>

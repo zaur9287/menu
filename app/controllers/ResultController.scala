@@ -55,5 +55,12 @@ class ResultController @Inject()(
     }
   }
 
+  def allReport = silhouette.SecuredAction.async(parse.json){implicit request =>
+    Result.filterForm.bindFromRequest().fold(
+      hasError=>Future (BadRequest(Json.toJson(hasError.errors.map(e=>Json.obj("key"->e.key,"message"->e.message))))),
+      data=>
+        thisService.allReport(data.trainingID,data.categoryID,data.quizID).map(r=>Ok(Json.toJson(r)))
+    )
+  }
 
 }

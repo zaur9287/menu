@@ -51,5 +51,17 @@ object Result {
     )(FilterForm.apply)(FilterForm.unapply)
 
   )
+
 }
 
+
+case class ReportRow(
+                     participantID:Int,
+                     participantName:String,
+                     categoryName:String,
+                     totalPoint:Option[Int],
+                     countCorrect:Int,
+                     response:Option[Int])
+object ReportRow{
+  implicit val jsonFormat = Json.format[ReportRow]
+}

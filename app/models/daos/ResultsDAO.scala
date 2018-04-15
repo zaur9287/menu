@@ -1,7 +1,7 @@
 package models.daos
 import org.joda.time.{DateTime, Seconds}
 import com.google.inject.{ImplementedBy, Inject}
-import models.caseClasses.Result
+import models.caseClasses._
 import play.api.db.slick.DatabaseConfigProvider
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -12,7 +12,7 @@ trait ResultsDAO {
   def createMultiply(rows: Seq[Result]): Future[Int]
   def delete(selectedID:Int): Future[Int]
   def findByID(id: Int): Future[Option[Result]]
-  def allReport(tID:Option[Int],cID:Option[Int],qID:Option[Int]):Future[Int]//training category quiz
+  def allReport(tID:Option[Int],cID:Option[Int],qID:Option[Int]):Future[Seq[ReportRow]]
 }
 
 class ResultsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)  extends ResultsDAO with DBTableDefinitions {
@@ -59,37 +59,32 @@ class ResultsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigPr
   }
 
 
-  override def allReport(tID:Option[Int],cID:Option[Int],qID:Option[Int]):Future[Int] = {
-    val query =   slickResult.filter(f=>f.correct===true)
-                  .join(slickSMS          .filter(f=>f.submitted.isDefined))  .on(_.SMSID === _.id)
-                  .join(slickParticipants .filter(f=>f.deletedAt.isEmpty))    .on(_._2.participantID === _.id)
-                  .join(slickCategories   .filter(f=>f.deletedAt.isEmpty))    .on(_._1._2.categoryID === _.id)
-                  .join(slickQuizzes      .filter(f=>f.deletedAt.isEmpty))    .on(_._1._1._2.quizID === _.id)
-                  .join(slickTrainings    .filter(f=>f.deletedAt.isEmpty))    .on(_._1._1._1._2.trainingID===_.id)
-    val testQuery = for {
-      cols<-slickResult.filter(f=>f.correct===true)
-        .join(slickSMS          .filter(f=>f.submitted.isDefined))  .on(_.SMSID === _.id)
-        .join(slickParticipants .filter(f=>f.deletedAt.isEmpty))    .on(_._2.participantID === _.id)
-        .join(slickCategories   .filter(f=>f.deletedAt.isEmpty))    .on(_._1._2.categoryID === _.id)
-        .join(slickQuizzes      .filter(f=>f.deletedAt.isEmpty))    .on(_._1._1._2.quizID === _.id)
-        .join(slickTrainings    .filter(f=>f.deletedAt.isEmpty))    .on(_._1._1._1._2.trainingID===_.id)
+  override def allReport(tID:Option[Int],cID:Option[Int],qID:Option[Int]):Future[Seq[ReportRow]] = {
+    var query = slickResult.filter(_.correct === true)
+      .join(slickSMS.filter(_.submitted.isDefined)).on(_.SMSID === _.id)
+      .join(slickParticipants.filter(_.deletedAt.isEmpty)).on(_._2.participantID === _.id)
+      .join(slickCategories.filter(_.deletedAt.isEmpty)).on(_._1._2.categoryID === _.id)
 
-    } yield{
-      (cols._1._1._1._2.name,
-        cols._1._1._2.name,
-        cols._2.name,cols._1._2.name,
-        cols._1._1._1._1._1.weight,
-        cols._1._1._1._1._1.correct,
-        cols._1._1._1._1._1.response
-      )
-    }
 
-    val tt = db.run(testQuery.groupBy(r=>r._1).result)
-    //tt
-    Future(0)
+    tID.foreach(f=>query = query.filter(_._1._1._2.trainingID ===f))
+    cID.foreach(f=>query = query.filter(_._1._1._2.categoryID ===f))
+    qID.foreach(f=>query = query.filter(_._1._1._2.quizID     ===f))
 
+    val groupedQuery = query.groupBy( f => {
+      val (((result,sms),participant),category) = f
+      (participant.id, participant.name, category.id, category.name)
+    })
+
+    val selectOnlyQuery = groupedQuery.map( f => {
+      val (participantID, participantName, categoryID, categoryName) = f._1
+      (participantID, participantName, categoryName, f._2.map(_._1._1._1.weight).sum, f._2.map(_._1._1._1.id).length, f._2.map(_._1._1._1.response).sum)
+    })
+
+
+    db.run(selectOnlyQuery.result).map(r=>
+      r.map(t=>ReportRow(t._1,t._2,t._3,t._4,t._5,t._6))
+    )
   }
-
 }
 
 

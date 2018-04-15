@@ -2,13 +2,27 @@ import net.minidev.asm.ex.ConvertException
 import org.joda.time.DateTime
 import utils.Hashids
 
+
+var number = "0704733458"
+
+
+
+
+if (number.take(2) == "05" || number.take(2)=="07") "00994"+number.slice(1,2)
+
+
+
+
+
+
+
 var s = "+994504733458"
 if (s.take(1)=="+") s= s.replace(s.take(1),"00")
 s
 
 val hashids = new Hashids
 var smsID=0
-val id:Int = 4
+val id:Int = 8
 var st = ""
 try
   st= hashids.encode(id)

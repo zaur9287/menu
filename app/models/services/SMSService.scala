@@ -4,11 +4,12 @@ import com.google.inject.ImplementedBy
 import javax.inject.Inject
 
 import models.caseClasses.SMS
-import models.caseClasses.SMS._
 import models.daos.SMSDAO
+import models.caseClasses.TestModel
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+
 
 @ImplementedBy(classOf[SMSServiceImpl])
 trait SMSService {
@@ -19,6 +20,7 @@ trait SMSService {
   def findByID(id: Int)                 :Future[Option[SMS]]
   def findUnSubmitted(id: Int)          :Future[Boolean]
   def sendSMS                           :Future[Option[Int]]
+  def getQuiz(id:String)                :Future[Option[TestModel]]
 }
 
 class SMSServiceImpl @Inject()(DAO: SMSDAO) extends SMSService {
@@ -29,4 +31,5 @@ class SMSServiceImpl @Inject()(DAO: SMSDAO) extends SMSService {
   override def findByID(id:Int):Future[Option[SMS]]                             = DAO.findByID(id)
   override def findUnSubmitted(id:Int):Future[Boolean]                          = DAO.findUnSubmitted(id)
   override def sendSMS: Future[Option[Int]]                                     = DAO.sendSMS
+  override def getQuiz(id: String): Future[Option[TestModel]]                   = DAO.getQuiz(id)
 }
