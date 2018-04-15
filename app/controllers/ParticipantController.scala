@@ -32,7 +32,7 @@ class ParticipantController @Inject()(
       data => {
         var phone=data.phone
         if (phone.take(1)=="+")                           phone = phone.replace(phone.take(1),"00")
-        if (phone.take(2) == "05" || phone.take(2)=="07") phone = "00994"+phone.slice(1,2)
+        if (phone.take(2) == "05" || phone.take(2)=="07") phone = "00994"+phone.slice(1,phone.length)
 
         thisService.create(Participant(0, data.name,phone,data.company,data.categoryID, DateTime.now(), DateTime.now(),None))
           .map( r =>

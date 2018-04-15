@@ -3,20 +3,20 @@ import org.joda.time.DateTime
 import utils.Hashids
 
 
-var number = "0704733458"
+var number = "0554733458"
+
+number.slice(2,number.length)
+
+
+if (number.take(2) == "05" || number.take(2)=="07") "00994"+number.slice(1,number.length)
 
 
 
 
-if (number.take(2) == "05" || number.take(2)=="07") "00994"+number.slice(1,2)
 
 
 
-
-
-
-
-var s = "+994504733458"
+var s = "0504733458"
 if (s.take(1)=="+") s= s.replace(s.take(1),"00")
 s
 
