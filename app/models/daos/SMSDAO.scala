@@ -81,28 +81,25 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
   }
 
   override def sendSMS: Future[Option[Int]] = {
-    println("bu funksiya sldksldksld --   == == +")
+    println("sendSMS function is working...")
     val hashids = new Hashids
     val smsApi = new SMSApi(wSClient)
-    val query = for {
-      (p,s)<- slickParticipants.filter(p=>p.deletedAt.isEmpty)
-        .joinRight(slickSMS.filter(s=>s.sent.isEmpty))
-        .on((p,s)=>p.id ===s.participantID && p.categoryID === s.categoryID).take(30)
-    } yield {
-      val tst  = p.map(res=>(res.phone,res.name,s.id))
-      tst.getOrElse("","",0)
-    }
-    for{
-        smsBody<-db.run(query.result).map(_.map(row=>
-          for {
-            sendSMS<-smsApi.sendSms(Seq(GateWaySMS(row._1, s"Salam ${row._2} bu linke daxil olun http://airp2018.testqmeter.net/v1/front/quiz/${hashids.encode(row._3) }")))
-            updatedSent<-db.run(slickSMS.filter(c =>c.id === row._3).map(c => (c.sent)).update((Some(DateTime.now()))))
-          }yield{
-            updatedSent
-          }
-        ))
+
+    val q = slickSMS.filter(f=>f.sent.isEmpty)
+      .joinLeft(slickParticipants.filter(_.deletedAt.isEmpty)).on(_.participantID ===_.id).take(30)
+
+    for {
+      seq<-db.run(q.result)
+      smsIDs= seq.map(r => {
+        val (sms, participant) = r
+        if (participant.isDefined) {
+          smsApi.sendSms (Seq (GateWaySMS (participant.get.phone, s"Salam ${participant.get.name}. Sizin ucun ayrilmis linke daxil olun http://airp2018.testqmeter.net/v1/front/quiz/${hashids.encode (sms.id)}")))
+          sms.id
+        } else {0}
+      })
+      a = smsIDs.map(smsID=> db.run(slickSMS.filter(c =>c.id ===smsID).map(c => c.sent).update(Some(DateTime.now()))))
     }yield{
-      Some(1)
+      Some(a.length)
     }
   }
 
