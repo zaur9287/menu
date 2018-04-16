@@ -37,7 +37,7 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
 
   override def createRows(cID:Int,qID:Int): Future[Int] = {
     val participantQuery = slickParticipants.filter(f => f.deletedAt.isEmpty && f.categoryID === cID)
-      .join(slickSMS.filter(f => f.sent.isEmpty && f.categoryID === cID && f.quizID === qID)).on(_.id === _.participantID)
+      .join(slickSMS.filter(f=>f.categoryID === cID && f.quizID === qID)).on(_.id === _.participantID)
 
     val any = for {
       un<-db.run(participantQuery.result).map(r=>r.length)
