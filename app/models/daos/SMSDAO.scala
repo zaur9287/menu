@@ -40,7 +40,7 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
       if(un ==0){
         val mytest  = for {
           temp <- db.run(slickParticipants.filter(f => f.deletedAt.isEmpty && f.categoryID === cID).result).map(_.map(participant =>
-            DBSMS(0, participant.id, trainingID.getOrElse(0), cID, qID, None, None, None)))
+            DBSMS(0, participant.id, trainingID.getOrElse(0), cID, qID, "pending", None, None)))
         }yield {db.run(slickSMS++=temp).map(_.map(r=>r))}
         mytest.flatten
       }else{Future(None)}
@@ -79,23 +79,26 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
     val hashids = new Hashids
     val smsApi = new SMSApi(wSClient)
 
-    val q = slickSMS.filter(f=>f.status.isEmpty)
+    val q = slickSMS.filter(f=>f.status === "pending")
       .joinLeft(slickParticipants.filter(_.deletedAt.isEmpty)).on(_.participantID ===_.id).take(30)
 
     for {
       seq<-db.run(q.result)
-      smsIDs= seq.map(r => {
-        val (sms, participant) = r
-        if (participant.isDefined) {
-          updateStatus(sms.id,"pending")
-          smsApi.sendSms (Seq (GateWaySMS (participant.get.phone, s"Salam ${participant.get.name}. Sizin ucun ayrilmis linke daxil olun http://airp2018.testqmeter.net/v1/front/quiz/${hashids.encode (sms.id)}")))
-          sms.id
-        } else {0}
-      })
-      a = smsIDs.map(smsID=> db.run(slickSMS.filter(c =>c.id ===smsID).map(c => c.status).update(Some("sent"))))
-    }yield{
-      Some(a.length)
-    }
+      smsIDs <- {
+        var recipients: Seq[GateWaySMS] = Seq()
+        seq.foreach(r => {
+          val (sms, participant) = r
+          if (participant.isDefined) {
+            recipients = recipients :+ GateWaySMS (participant.get.phone, s"Salam ${participant.get.name}. Sizin ucun ayrilmis linke daxil olun http://airp2018.testqmeter.net/v1/front/quiz/${hashids.encode (sms.id)}")
+          }
+        })
+        for {
+          sendAll <- smsApi.sendSms(recipients)
+          updateStatuses <- updateStatus( seq.map(_._1.id) ,"sending")
+        } yield sendAll
+      }
+      a <- updateStatus(seq.map(_._1.id), "sent")
+    } yield Some(a)
   }
 
 
@@ -128,7 +131,12 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
 
 
   override  def updateStatus(id:Int,status:String): Future[Int] = {
-    val updateQuery = slickSMS.filter(c => c.id === id).map(c => (c.status)).update((Some(status)))
+    val updateQuery = slickSMS.filter(c => c.id === id).map(c => (c.status)).update((status))
+    db.run(updateQuery)
+  }
+
+  private def updateStatus(ids: Seq[Int], status: String): Future[Int] = {
+    val updateQuery = slickSMS.filter(c => c.id inSet(ids)).map(_.status).update((status))
     db.run(updateQuery)
   }
 }

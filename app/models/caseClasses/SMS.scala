@@ -13,7 +13,7 @@ case class SMS(
                  trainingID    : Int,
                  categoryID    : Int,
                  quizID        : Int,
-                 status        : Option[String],
+                 status        : String,
                  opened        : Option[DateTime],
                  submitted     : Option[DateTime]
                ){

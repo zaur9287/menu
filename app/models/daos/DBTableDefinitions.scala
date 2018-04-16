@@ -403,7 +403,7 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
                         trainingID      : Int,
                         categoryID      : Int,
                         quizID          : Int,
-                        status          : Option[String],
+                        status          : String,
                         opened          : Option[DateTime],
                         submitted       : Option[DateTime],
                       ){
@@ -417,7 +417,7 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
     def trainingID         = column[Int]    ("training_id")
     def categoryID         = column[Int]    ("category_id")
     def quizID             = column[Int]    ("quiz_id")
-    def status             = column[Option[String]]("status")
+    def status             = column[String] ("status")
     def opened             = column[Option[DateTime]]("opened")
     def submitted          = column[Option[DateTime]]("submitted")
 
