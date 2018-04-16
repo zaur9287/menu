@@ -318,25 +318,27 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
   case class DBQuizzes(
                              id              : Int,
                              name            : String,
-                             trainingID     : Int,
+                             spiker          : String,
+                             trainingID      : Int,
                              categoryID      : Int,
                              createdAt       : DateTime,
                              updatedAt       : DateTime,
                              deletedAt       : Option[DateTime]
                            ){
-    def toQuiz: Quiz= Quiz(id,name,trainingID,categoryID,createdAt,updatedAt,deletedAt)
+    def toQuiz: Quiz= Quiz(id,name,spiker,trainingID,categoryID,createdAt,updatedAt,deletedAt)
   }
 
   class Quizzes(tag: Tag) extends Table[DBQuizzes](tag, "quiz"){
     def id                 = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def name               = column[String]("name")
+    def spiker             = column[String]("spiker")
     def trainingID         = column[Int]("training_id")
     def categoryID         = column[Int]("category_id")
     def createdAt          = column[DateTime]("created_at")
     def updatedAt          = column[DateTime]("updated_at")
     def deletedAt          = column[Option[DateTime]]("deleted_at")
 
-    override def * = (id,name,trainingID,categoryID,createdAt,updatedAt,deletedAt) <> (DBQuizzes.tupled, DBQuizzes.unapply)
+    override def * = (id,name,spiker,trainingID,categoryID,createdAt,updatedAt,deletedAt) <> (DBQuizzes.tupled, DBQuizzes.unapply)
   }
 
   val slickQuizzes= TableQuery[Quizzes]

@@ -50,18 +50,15 @@ class QuizzesDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigPr
 
   override def create(row: Quiz): Future[Option[Quiz]] = {
     val result = for{
-      affected<-db.run(slickQuizzes.filter(f=>f.deletedAt.isEmpty && f.name ===row.name && f.trainingID ===row.trainingID && f.categoryID ===row.categoryID).result)
+      affected<-db.run(slickQuizzes.filter(f=>f.deletedAt.isEmpty && f.name ===row.name  && f.spiker ===row.spiker && f.trainingID ===row.trainingID && f.categoryID ===row.categoryID).result)
     }yield{
       if(affected.length==0){
         for{
-          res<-db.run(slickQuizzes.returning(slickQuizzes) += DBQuizzes(row.id, row.name,row.trainingID,row.categoryID, row.createdAt, row.updatedAt, None))
+          res<-db.run(slickQuizzes.returning(slickQuizzes) += DBQuizzes(row.id, row.name,row.spiker,row.trainingID,row.categoryID, row.createdAt, row.updatedAt, None))
         }yield{Some(res.toQuiz)}
       }else{Future(None)}
     }
     result.flatMap(r=>r)
-//    val dBRow = DBQuizzes(row.id, row.name,row.trainingID,row.categoryID, row.createdAt, row.updatedAt, None)
-//    val query = slickQuizzes.returning(slickQuizzes) += dBRow
-//    db.run(query).map ( r => Some(r.toQuiz) )
   }
 
   override def delete(selectedID:Int): Future[Int] = {
@@ -80,15 +77,15 @@ class QuizzesDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigPr
 
   override  def update(id:Int,updateForm: UpdateFormQuiz): Future[Option[Quiz]] = {
     val updateQuery = slickQuizzes.filter(c => c.id === id && c.deletedAt.isEmpty)
-      .map(c => (c.name,c.trainingID,c.categoryID, c.updatedAt))
-      .update((updateForm.name,updateForm.trainingID,updateForm.categoryID, DateTime.now))
+      .map(c => (c.name,c.spiker,c.trainingID,c.categoryID, c.updatedAt))
+      .update((updateForm.name,updateForm.spiker,updateForm.trainingID,updateForm.categoryID, DateTime.now))
 
     val result = for {
       getUpdated <- findByID(id)
       updateRowCount <- if(getUpdated.isDefined){ db.run(updateQuery) } else { Future(0) }
     } yield {
       if(updateRowCount > 0){
-        getUpdated.map(c => c.copy(id = id,name = updateForm.name, updatedAt = c.updatedAt,createdAt = c.createdAt,deletedAt = c.deletedAt))
+        getUpdated.map(c => c.copy(id = id,name = updateForm.name,spiker = updateForm.spiker, updatedAt = c.updatedAt,createdAt = c.createdAt,deletedAt = c.deletedAt))
       } else {None}
     }
     result
@@ -110,12 +107,12 @@ class QuizzesDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigPr
   }
 
   override def pureDelete(id:Int): Future[Int] = {
-    val query = slickQuizzes.filter(f=>f.id === id && f.deletedAt.isEmpty).map(c=>(c.deletedAt)).update(Some(DateTime.now))
+    val query = slickQuizzes.filter(f=>f.id === id && f.deletedAt.isEmpty).map(c=>c.deletedAt).update(Some(DateTime.now))
     db.run(query).map(r=>r)
   }
 
   override def pureDeleteAll: Future[Int] = {
-    val query = slickQuizzes.filter(f=>f.deletedAt.isEmpty).map(c=>(c.deletedAt)).update(Some(DateTime.now))
+    val query = slickQuizzes.filter(f=>f.deletedAt.isEmpty).map(c=>c.deletedAt).update(Some(DateTime.now))
     db.run(query).map(r=>r)
   }
   override def findBySearchForm(tID:Int,cID:Int): Future[Seq[Quiz]] = {

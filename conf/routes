@@ -120,13 +120,11 @@ PUT     /v1/answers/update/:id              controllers.AnswerController.Update(
 GET     /v1/answers/getone/:id              controllers.AnswerController.GetOne(id:Int)
 GET     /v1/answers/getbyquestion/:id       controllers.AnswerController.getByQuestionID(id:Int)
 
-
 #Front links
 POST    /v1/sms/sendmessages                controllers.SMSController.sendMessages
 GET     /v1/front/quiz/:id                  controllers.SMSController.getQuiz(id: String)
 PUT     /v1/result/submitresult/:id         controllers.ResultController.SubmitResult(id:String)
 POST    /v1/allreport                       controllers.ResultController.allReport
-
 
 # Home page
 GET         /                                controllers.ApplicationController.index

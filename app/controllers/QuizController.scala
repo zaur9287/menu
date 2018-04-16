@@ -35,7 +35,7 @@ class QuizController @Inject()(
     Quiz.form.bindFromRequest().fold(
       formWithErrors => Future(BadRequest(Json.toJson(formWithErrors.errors.map(e => Json.obj("key" -> e.key, "message" -> e.message))))),
       data => {
-        thisService.create(Quiz(0, data.name,data.trainingID,data.categoryID, DateTime.now(), DateTime.now(),None))
+        thisService.create(Quiz(0, data.name,data.spiker,data.trainingID,data.categoryID, DateTime.now(), DateTime.now(),None))
           .map( r =>
             if(r.isDefined){
               Ok(Json.toJson(r.get))

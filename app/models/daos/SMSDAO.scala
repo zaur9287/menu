@@ -17,11 +17,10 @@ trait SMSDAO {
   def createRows(cID:Int,qID:Int)             : Future[Int]
   def delete(id:Int)                          : Future[Int]
   def updateOpened(id:Int)                    : Future[Int]
-  def findByID(id: Int)                       : Future[Option[SMS]]
   def findUnSubmitted(id:Int)                 : Future[Boolean]
   def sendSMS                                 : Future[Option[Int]]
   def getQuiz(id:String)                      : Future[Option[TestModel]]
-  def updateStatus(id:Int,status:String)      : Future[Int]
+  def updateSubmit(id:Int)                    : Future[Int]
 }
 
 class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,wSClient: WSClient)(implicit executionContext: ExecutionContext)  extends SMSDAO with DBTableDefinitions {
@@ -59,18 +58,13 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
   override  def updateOpened(id:Int): Future[Int] = {
 
     val updateQuery = slickSMS.filter(c => c.id === id)
-      .map(c => (c.opened))
-      .update((Some(DateTime.now())))
+      .map(c => c.opened)
+      .update(Some(DateTime.now()))
       db.run(updateQuery)
   }
 
-  override def findByID(id:Int): Future[Option[SMS]] = {
-    val query = slickSMS.filter(f=>f.id === id).result
-    db.run(query.headOption).map(_.map(_.toSMS))
-  }
-
   override def findUnSubmitted(id:Int): Future[Boolean] = {
-    val query = slickSMS.filter(f=>f.id === id && f.submitted.isEmpty).result.head.map(_.submitted.isEmpty)
+    val query = slickSMS.filter(f=>f.id === id && f.submitted.isEmpty).result.headOption.map(_.map(_.submitted.isEmpty).getOrElse(false))
     db.run(query)
   }
 
@@ -119,7 +113,9 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
                  .join(slickAnswers.filter(_.deletedAt.isEmpty)).on(_.id === _.questionID).result)
         } else {Future(Seq())}
       }
+      //updateSMS<-updateOpened(smsID)
     }yield{
+      //updateSMS
       r.map { resultSet =>
         val ((((sms, participant), category), training), quiz) = resultSet
         val quests = questionsOption.groupBy(_._1).map( res =>
@@ -129,14 +125,13 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
     }
   }
 
-
-  override  def updateStatus(id:Int,status:String): Future[Int] = {
-    val updateQuery = slickSMS.filter(c => c.id === id).map(c => (c.status)).update((status))
+  override  def updateSubmit(id:Int): Future[Int] = {
+    val updateQuery = slickSMS.filter(c => c.id === id).map(c => c.submitted).update(Some(DateTime.now))
     db.run(updateQuery)
   }
 
   private def updateStatus(ids: Seq[Int], status: String): Future[Int] = {
-    val updateQuery = slickSMS.filter(c => c.id inSet(ids)).map(_.status).update((status))
+    val updateQuery = slickSMS.filter(c => c.id inSet(ids)).map(_.status).update(status)
     db.run(updateQuery)
   }
 }

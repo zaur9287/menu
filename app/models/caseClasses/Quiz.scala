@@ -10,6 +10,7 @@ import play.api.libs.json.JodaReads._
 case class Quiz(
                         id         : Int,
                         name       : String,
+                        spiker     : String,
                         trainingID : Int,
                         categoryID : Int,
                         createdAt  : DateTime,
@@ -23,6 +24,7 @@ object Quiz {
 
   case class UpdateFormQuiz(
                              name       : String,
+                             spiker     : String,
                              trainingID : Int,
                              categoryID : Int
                              )
@@ -32,6 +34,7 @@ object Quiz {
   val updateForm = Form(
     mapping(
       "name"       -> nonEmptyText,
+      "spiker"     -> nonEmptyText,
       "training_id"-> number,
       "category_id"-> number
     )(UpdateFormQuiz.apply)(UpdateFormQuiz.unapply)
@@ -39,6 +42,7 @@ object Quiz {
 
   case class CreateFormQuiz(
                              name       : String,
+                             spiker     : String,
                              trainingID : Int,
                              categoryID : Int
                              )
@@ -47,6 +51,7 @@ object Quiz {
   val form= Form(
     mapping(
       "name"       -> nonEmptyText,
+      "spiker"     -> nonEmptyText,
       "training_id"-> number,
       "category_id"-> number
     )(CreateFormQuiz.apply)(CreateFormQuiz.unapply)
