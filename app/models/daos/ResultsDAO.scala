@@ -26,9 +26,9 @@ class ResultsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigPr
       weight<-db.run(slickQuestions.filter(f=>f.deletedAt.isEmpty && f.id === row.questionID).result.head.map(_.weight))
       createdAt <- db.run(slickSMS.filter(f => f.id === row.SMSID && f.opened.isDefined).result.headOption)
       affected<- {
-        val responseTime = createdAt.map ( sms =>
+        val responseTime = createdAt.flatMap ( sms =>
           sms.opened.map( openedDefined => Seconds.secondsBetween(openedDefined, sms.submitted.get).getSeconds)
-        ).flatten.getOrElse(0)
+        ).getOrElse(0)
         db.run(slickResult+=DBResult(row.id, row.SMSID,row.questionID,row.answerID, correct, weight,responseTime))
       }
     }yield{
@@ -39,11 +39,16 @@ class ResultsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigPr
 //    db.run(query).map ( r => Some(r.toResult) )
   }
   override def createMultiply(rows: Seq[Result]): Future[Int]= {
-    val dbResults = rows.map( r=> DBResult(0,r.SMSID,r.questionID,r.answerID,r.correct,r.weight,0))
+    val test = for (
+      res<-rows.map(r=>create(r))
+    )yield res
+    Future.sequence(test).map(_.length)
 
-    val result = db.run(slickResult ++= dbResults).map( r =>
-      rows.length)
-    result
+//    val dbResults = rows.map( r=> DBResult(0,r.SMSID,r.questionID,r.answerID,r.correct,r.weight,0))
+//
+//    val result = db.run(slickResult ++= dbResults).map( r =>
+//      rows.length)
+//    result
   }
 
   override def delete(selectedID:Int): Future[Int] = {
