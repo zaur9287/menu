@@ -36,10 +36,10 @@ class ResultController @Inject()(
           Result.form.bindFromRequest().fold(
             hasError=>Future(BadRequest(Json.toJson(hasError.errors.map(e=>Json.obj("key"->e.key,"message"->e.message))))),
             data =>{
+              for (
+                t<-sMSService.updateSubmit(smsID).map(r=>r)
+              )yield t
               val result = thisService.createMultiply(data.map(d=>Result(0,smsID,d.questionID,d.answerID,false,0,0)))
-//              for (
-//              t<-sMSService.updateSubmit(smsID).map(r=>r)
-//              )yield t
 
               result.map( r => Ok(Json.obj("result"->r)))
             }
