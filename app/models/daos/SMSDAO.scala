@@ -37,22 +37,22 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
 
   override def createRows(cID:Int,qID:Int): Future[Int] = {
     val participantQuery = slickParticipants.filter(f => f.deletedAt.isEmpty && f.categoryID === cID)
-      .join(slickSMS.filter(f => f.sent.isEmpty && f.categoryID === cID && f.quizID === qID))
+      .join(slickSMS.filter(f => f.sent.isEmpty && f.categoryID === cID && f.quizID === qID)).on(_.id === _.participantID)
 
-    for {
+    val any = for {
       un<-db.run(participantQuery.result).map(r=>r.length)
+      trainingID <- db.run(slickQuizzes.filter(f=>f.categoryID === cID && f.id === qID ).map(_.trainingID).result.headOption)
     }yield{
-      if (un==0){
-        for {
-          trainingID <- db.run(slickQuizzes.filter(_.id === qID).map(_.trainingID).result.headOption)
-          participants <- db.run(participantQuery.result).map(t => t.map(p => DBSMS(0, p._1.id, trainingID.getOrElse(0), cID, qID, None, None, None)))
-          affectedRows <- db.run(slickSMS ++= participants).map(_.map(r => r))
-        } yield {
-          affectedRows.getOrElse(0)
-        }
-        0
-      }else{0}
+      if(un ==0){
+        val mytest  = for {
+          temp <- db.run(slickParticipants.filter(f => f.deletedAt.isEmpty && f.categoryID === cID).result).map(_.map(participant =>
+            DBSMS(0, participant.id, trainingID.getOrElse(0), cID, qID, None, None, None)))
+        }yield {db.run(slickSMS++=temp).map(_.map(r=>r))}
+        mytest.flatten
+      }else{Future(None)}
     }
+    any.flatten.map(_.getOrElse(0))
+
   }
 
   override def delete(id:Int): Future[Int] = {
