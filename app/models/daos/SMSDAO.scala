@@ -14,7 +14,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[SMSDAOImpl])
 trait SMSDAO {
-  def create(row: SMS)                        : Future[Option[SMS]]
   def createRows(cID:Int,qID:Int)             : Future[Int]
   def delete(id:Int)                          : Future[Int]
   def updateOpened(id:Int)                    : Future[Int]
@@ -22,18 +21,13 @@ trait SMSDAO {
   def findUnSubmitted(id:Int)                 : Future[Boolean]
   def sendSMS                                 : Future[Option[Int]]
   def getQuiz(id:String)                      : Future[Option[TestModel]]
+  def updateStatus(id:Int,status:String)      : Future[Int]
 }
 
 class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,wSClient: WSClient)(implicit executionContext: ExecutionContext)  extends SMSDAO with DBTableDefinitions {
   import profile.api._
   import com.github.tototoshi.slick.PostgresJodaSupport._
 
-
-  override def create(row: SMS): Future[Option[SMS]] = {
-    val dBRow = DBSMS(row.id, row.participantID,row.trainingID, row.categoryID, row.quizID,row.sent,row.opened,row.submitted)
-    val query = slickSMS.returning(slickSMS) += dBRow
-    db.run(query).map ( r => Some(r.toSMS) )
-  }
 
   override def createRows(cID:Int,qID:Int): Future[Int] = {
     val participantQuery = slickParticipants.filter(f => f.deletedAt.isEmpty && f.categoryID === cID)
@@ -85,7 +79,7 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
     val hashids = new Hashids
     val smsApi = new SMSApi(wSClient)
 
-    val q = slickSMS.filter(f=>f.sent.isEmpty)
+    val q = slickSMS.filter(f=>f.status.isEmpty)
       .joinLeft(slickParticipants.filter(_.deletedAt.isEmpty)).on(_.participantID ===_.id).take(30)
 
     for {
@@ -93,11 +87,12 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
       smsIDs= seq.map(r => {
         val (sms, participant) = r
         if (participant.isDefined) {
+          updateStatus(sms.id,"pending")
           smsApi.sendSms (Seq (GateWaySMS (participant.get.phone, s"Salam ${participant.get.name}. Sizin ucun ayrilmis linke daxil olun http://airp2018.testqmeter.net/v1/front/quiz/${hashids.encode (sms.id)}")))
           sms.id
         } else {0}
       })
-      a = smsIDs.map(smsID=> db.run(slickSMS.filter(c =>c.id ===smsID).map(c => c.sent).update(Some(DateTime.now()))))
+      a = smsIDs.map(smsID=> db.run(slickSMS.filter(c =>c.id ===smsID).map(c => c.status).update(Some("sent"))))
     }yield{
       Some(a.length)
     }
@@ -131,6 +126,11 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
     }
   }
 
+
+  override  def updateStatus(id:Int,status:String): Future[Int] = {
+    val updateQuery = slickSMS.filter(c => c.id === id).map(c => (c.status)).update((Some(status)))
+    db.run(updateQuery)
+  }
 }
 
 

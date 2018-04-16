@@ -403,11 +403,11 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
                         trainingID      : Int,
                         categoryID      : Int,
                         quizID          : Int,
-                        sent            : Option[DateTime],
+                        status          : Option[String],
                         opened          : Option[DateTime],
                         submitted       : Option[DateTime],
                       ){
-    def toSMS:SMS = SMS(id,participantID,trainingID,categoryID,quizID,sent,opened,submitted)
+    def toSMS:SMS = SMS(id,participantID,trainingID,categoryID,quizID,status,opened,submitted)
 
   }
 
@@ -417,11 +417,11 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
     def trainingID         = column[Int]    ("training_id")
     def categoryID         = column[Int]    ("category_id")
     def quizID             = column[Int]    ("quiz_id")
-    def sent               = column[Option[DateTime]]("sent")
+    def status             = column[Option[String]]("status")
     def opened             = column[Option[DateTime]]("opened")
     def submitted          = column[Option[DateTime]]("submitted")
 
-    override def * = (id,participantID,trainingID,categoryID,quizID,sent,opened,submitted) <> (DBSMS.tupled, DBSMS.unapply)
+    override def * = (id,participantID,trainingID,categoryID,quizID,status,opened,submitted) <> (DBSMS.tupled, DBSMS.unapply)
   }
 
   val slickSMS= TableQuery[SMSs]

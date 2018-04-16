@@ -13,7 +13,7 @@ case class SMS(
                  trainingID    : Int,
                  categoryID    : Int,
                  quizID        : Int,
-                 sent          : Option[DateTime],
+                 status        : Option[String],
                  opened        : Option[DateTime],
                  submitted     : Option[DateTime]
                ){
@@ -23,30 +23,6 @@ case class SMS(
 object SMS {
 
   implicit val jsonFormat = Json.format[SMS]
-
-  case class UpdateFormSMS(
-                            participantID : Int,
-                            trainingID    : Int,
-                            categoryID    : Int,
-                            quizID        : Int,
-                            sent          : Option[String],
-                            opened        : Option[String],
-                            submitted     : Option[String]
-                           )
-
-  object UpdateFormSMS { implicit val jsonFormat = Json.format[UpdateFormSMS] }
-
-  val updateForm = Form(
-    mapping(
-      "participantID" -> number,
-      "trainingID"    -> number,
-      "categoryID"    -> number,
-      "quizID"        -> number,
-      "sent"          -> optional (text),//.transform(s => s.map(ds => DateTime.parse(ds)), (d: DateTime) => Some(d.toString)),
-      "opened"        -> optional (text),//.transform(s => s.map(ds => DateTime.parse(ds)), (d: DateTime) => Some(d.toString)),
-      "submitted"     -> optional (text)//.transform(s => s.map(ds => DateTime.parse(ds)), (d: DateTime) => Some(d.toString))
-    )(UpdateFormSMS.apply)(UpdateFormSMS.unapply)
-  )
 
   case class SentFormSMS(
                             categoryID    : Int,

@@ -13,7 +13,6 @@ import scala.concurrent.Future
 
 @ImplementedBy(classOf[SMSServiceImpl])
 trait SMSService {
-  def create (el: SMS)                  :Future[Option[SMS]]
   def createRows(cID:Int,qID:Int)       :Future[Int]
   def delete(id:Int)                    :Future[Int]
   def updateOpened(id: Int)             :Future[Int]
@@ -24,7 +23,6 @@ trait SMSService {
 }
 
 class SMSServiceImpl @Inject()(DAO: SMSDAO) extends SMSService {
-  override def create(el: SMS): Future[Option[SMS]]                             = DAO.create(el)
   override def createRows(cID:Int,qID:Int): Future[Int]                         = DAO.createRows(cID,qID)
   override def delete(id:Int): Future[Int]                                      = DAO.delete(id)
   override def updateOpened(id: Int): Future[Int]                               = DAO.updateOpened(id)

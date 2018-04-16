@@ -8,7 +8,7 @@ CREATE TABLE sms (
   training_id       BIGINT,
   category_id       BIGINT,
   quiz_id           BIGINT,
-  sent              TIMESTAMP WITH TIME ZONE,
+  status            VARCHAR,
   opened            TIMESTAMP WITH TIME ZONE,
   submitted         TIMESTAMP WITH TIME ZONE
 );
