@@ -83,7 +83,7 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
         seq.foreach(r => {
           val (sms, participant) = r
           if (participant.isDefined) {
-            recipients = recipients :+ GateWaySMS (participant.get.phone, s"Salam ${participant.get.name}. Sizin ucun ayrilmis linke daxil olun http://airp2018.testqmeter.net/v1/front/quiz/${hashids.encode (sms.id)}")
+            recipients = recipients :+ GateWaySMS (participant.get.phone, s"Salam ${participant.get.name}. Sizin ucun ayrilmis linke daxil olun http://airp2018.testqmeter.net/quiz/${hashids.encode (sms.id)}")
           }
         })
         for {
