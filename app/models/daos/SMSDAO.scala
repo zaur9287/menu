@@ -100,7 +100,7 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
     val hashids = new Hashids
     val smsApi = new SMSApi(wSClient)
     val smsID = hashids.decode(id)(0).toInt
-    def q(sID: Int) = slickSMS.filter(_.id === sID )
+    def q(sID: Int) = slickSMS.filter(f=>f.id === sID && f.submitted.isEmpty )
       .join(slickParticipants.filter(_.deletedAt.isEmpty)).on(_.participantID===_.id)
       .join(slickCategories.filter(_.deletedAt.isEmpty)).on(_._1.categoryID === _.id)
       .join(slickTrainings.filter(_.deletedAt.isEmpty)).on(_._1._1.trainingID === _.id)
@@ -115,7 +115,7 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
       }
       updateSMS<-updateOpened(smsID)
     }yield{
-      updateSMS
+      updateSMS // əgər sms submit olunubsa, dəyər göndərilməsin
       r.map { resultSet =>
         val ((((sms, participant), category), training), quiz) = resultSet
         val quests = questionsOption.groupBy(_._1).map( res =>
