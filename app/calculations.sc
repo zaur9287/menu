@@ -30,7 +30,7 @@ catch{
   case ex:ConvertException=>println("There is error")
 }
 
-st
+st = "k5"
 
 try
   hashids.decode(st)(0)

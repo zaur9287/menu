@@ -36,10 +36,10 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
       un<-db.run(participantQuery.result).map(r=>r.length)
       trainingID <- db.run(slickQuizzes.filter(f=>f.categoryID === cID && f.id === qID ).map(_.trainingID).result.headOption)
     }yield{
-      if(un ==0){
+      if(un ==0 && trainingID.getOrElse(0)>0){
         val mytest  = for {
           temp <- db.run(slickParticipants.filter(f => f.deletedAt.isEmpty && f.categoryID === cID).result).map(_.map(participant =>
-            DBSMS(0, participant.id, trainingID.getOrElse(0), cID, qID, "pending", None, None)))
+            DBSMS(0, participant.id, trainingID.get, cID, qID, "pending", None, None)))
         }yield {db.run(slickSMS++=temp).map(_.map(r=>r))}
         mytest.flatten
       }else{Future(None)}
