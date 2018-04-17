@@ -113,9 +113,9 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
                  .join(slickAnswers.filter(_.deletedAt.isEmpty)).on(_.id === _.questionID).result)
         } else {Future(Seq())}
       }
-      //updateSMS<-updateOpened(smsID)
+      updateSMS<-updateOpened(smsID)
     }yield{
-      //updateSMS
+      updateSMS
       r.map { resultSet =>
         val ((((sms, participant), category), training), quiz) = resultSet
         val quests = questionsOption.groupBy(_._1).map( res =>
