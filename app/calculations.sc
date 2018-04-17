@@ -44,3 +44,13 @@ DateTime.now.toString
 val a:Option[Boolean] = None
 if (a.isDefined){a.get}else{a.getOrElse(false)}
 
+
+protected def normalizePhoneNumber(number:String):String ={
+  var tempNumber = ""
+  if (number.take(1)=="+")                            tempNumber = number.replace(number.take(1),"00")
+  if (number.take(2) == "05" || number.take(2)=="07") tempNumber = "00994"+number.slice(1,number.length)
+  tempNumber
+}
+
+
+normalizePhoneNumber("+994504733458")

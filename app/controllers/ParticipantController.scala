@@ -21,6 +21,12 @@ class ParticipantController @Inject()(
                                     silhouette: Silhouette[DefaultEnv]
                                   ) extends AbstractController(cc) {
 
+  protected def normalizePhoneNumber(number:String):String ={
+    var tempNumber = ""
+    if (number.take(1)=="+")                            tempNumber = number.replace(number.take(1),"00")
+    if (number.take(2) == "05" || number.take(2)=="07") tempNumber = "00994"+number.slice(1,number.length)
+    tempNumber
+  }
 
   def Get = silhouette.SecuredAction.async { implicit request =>
     thisService.get.map(r => Ok(Json.toJson(r)))
@@ -30,11 +36,7 @@ class ParticipantController @Inject()(
     Participant.form.bindFromRequest().fold(
       formWithErrors => Future(BadRequest(Json.toJson(formWithErrors.errors.map(e => Json.obj("key" -> e.key, "message" -> e.message))))),
       data => {
-        var phone=data.phone
-        if (phone.take(1)=="+")                           phone = phone.replace(phone.take(1),"00")
-        if (phone.take(2) == "05" || phone.take(2)=="07") phone = "00994"+phone.slice(1,phone.length)
-
-        thisService.create(Participant(0, data.name,phone,data.company,data.categoryID, DateTime.now(), DateTime.now(),None))
+        thisService.create(Participant(0, data.name,normalizePhoneNumber(data.phone),data.company,data.categoryID, DateTime.now(), DateTime.now(),None))
           .map( r =>
             if(r.isDefined){
               Ok(Json.toJson(r.get))
@@ -60,10 +62,10 @@ class ParticipantController @Inject()(
     test.map(r=>Ok(Json.toJson(r)))
   }
   def Update(id: Int) = silhouette.SecuredAction.async(parse.json){ implicit request=>
-    updateForm.bindFromRequest().fold(
+    Participant.updateForm.bindFromRequest().fold(
       formWithErrors => Future(BadRequest(Json.toJson(formWithErrors.errors.map(e => Json.obj("key" -> e.key, "message" -> e.message))))),
       data => {
-        thisService.update(id, data).map( r =>
+        thisService.update(id, UpdateFormParticipant(data.name,normalizePhoneNumber(data.phone),data.company,data.categoryID)).map( r =>
           if(r.isDefined){
             Ok(Json.toJson(r.get))
           } else {
