@@ -75,7 +75,7 @@ class ParticipantsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseCon
       updateRowCount <- if(getUpdated.isDefined){ db.run(updateQuery) } else { Future(0) }
     } yield {
       if(updateRowCount > 0){
-        getUpdated.map(c => c.copy(id = id,name = updateForm.name, updatedAt = c.updatedAt,createdAt = c.createdAt,deletedAt = c.deletedAt))
+        getUpdated.map(c => c.copy(id = id,name = updateForm.name,phone = c.phone, updatedAt = c.updatedAt,createdAt = c.createdAt,deletedAt = c.deletedAt))
       } else {None}
     }
     result

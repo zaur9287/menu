@@ -22,7 +22,7 @@ class ParticipantController @Inject()(
                                   ) extends AbstractController(cc) {
 
   protected def normalizePhoneNumber(number:String):String ={
-    var tempNumber = ""
+    var tempNumber = number
     if (number.take(1)=="+")                            tempNumber = number.replace(number.take(1),"00")
     if (number.take(2) == "05" || number.take(2)=="07") tempNumber = "00994"+number.slice(1,number.length)
     tempNumber
@@ -65,7 +65,8 @@ class ParticipantController @Inject()(
     Participant.updateForm.bindFromRequest().fold(
       formWithErrors => Future(BadRequest(Json.toJson(formWithErrors.errors.map(e => Json.obj("key" -> e.key, "message" -> e.message))))),
       data => {
-        thisService.update(id, UpdateFormParticipant(data.name,normalizePhoneNumber(data.phone),data.company,data.categoryID)).map( r =>
+        var testData = Participant.UpdateFormParticipant(data.name,normalizePhoneNumber(data.phone),data.company,data.categoryID)
+        thisService.update(id, testData).map( r =>
           if(r.isDefined){
             Ok(Json.toJson(r.get))
           } else {
