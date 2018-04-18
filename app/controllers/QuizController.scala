@@ -79,7 +79,7 @@ class QuizController @Inject()(
     updateForm.bindFromRequest().fold(
       formWithErrors => Future(BadRequest(Json.toJson(formWithErrors.errors.map(e => Json.obj("key" -> e.key, "message" -> e.message))))),
       data => {
-        thisService.update(id, data).map( r =>Ok(Json.toJson(r)))
+        thisService.update(id, data).map( r =>Ok(Json.obj("result"->r)))
       }
     )
   }

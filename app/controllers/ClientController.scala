@@ -71,7 +71,7 @@ class ClientController @Inject()(
     ClientForms.updateForm.bindFromRequest().fold(
       formWithErrors => Future(BadRequest(Json.toJson(formWithErrors.errors.map(e => Json.obj("key" -> e.key, "message" -> e.message))))),
       data => {
-        clientService.update(id, data).map( r =>Ok(Json.toJson(r)))
+        clientService.update(id, data).map( r =>Ok(Json.obj("result"->r)))
       }
     )
   }

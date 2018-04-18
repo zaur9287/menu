@@ -65,7 +65,7 @@ class CompanyController @Inject()(
     CompanyForms.updateForm.bindFromRequest().fold(
       formWithErrors => Future(BadRequest(Json.toJson(formWithErrors.errors.map(e => Json.obj("key" -> e.key, "message" -> e.message))))),
       data => {
-        companyService.update(id, data).map( r =>Ok(Json.toJson(r)))
+        companyService.update(id, data).map( r =>Ok(Json.obj("result"->r)))
       }
     )
   }
