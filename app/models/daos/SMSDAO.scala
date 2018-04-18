@@ -101,12 +101,12 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
     val hashids = new Hashids
     val smsApi = new SMSApi(wSClient)
     val smsID = hashids.decode(id)(0).toInt
-    def q(sID: Int) = slickSMS.filter(f=>f.id === sID && f.submitted.isEmpty )
+    def q(sID: Int) = slickSMS.filter(f=>f.id === sID)
       .join(slickParticipants.filter(_.deletedAt.isEmpty)).on(_.participantID===_.id)
       .join(slickCategories.filter(_.deletedAt.isEmpty)).on(_._1.categoryID === _.id)
       .join(slickTrainings.filter(_.deletedAt.isEmpty)).on(_._1._1.trainingID === _.id)
       .join(slickQuizzes.filter(_.deletedAt.isEmpty)).on(_._1._1._1.quizID === _.id)
-    for {
+    val test = for {
       r<-db.run(q(smsID).result.headOption)
       questionsOption <- {
         if(r.isDefined){
@@ -115,16 +115,20 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
         } else {Future(Seq())}
       }
       updateSMS<-updateOpened(smsID)
-    }yield{
-      updateSMS // əgər sms submit olunubsa, dəyər göndərilməsin
+    }yield {
       r.map { resultSet =>
         val ((((sms, participant), category), training), quiz) = resultSet
-        val quests = questionsOption.groupBy(_._1).map( res =>
-          TestQuestion(res._1.toQuestion, res._2.map(n => TestAnswer(n._2.id, n._2.text))))
-        TestModel(participant.toParticipant,quiz.toQuiz,training.toTraining,category.toCategory,quests.toSeq)
+          val quests = questionsOption.groupBy(_._1).map(res =>
+            TestQuestion(res._1.toQuestion, res._2.map(n => TestAnswer(n._2.id, n._2.text))))
+        if (sms.submitted.isEmpty)
+          TestModel(participant.toParticipant, quiz.toQuiz, training.toTraining, category.toCategory, quests.toSeq)
+        else
+          TestModel(participant.toParticipant, quiz.toQuiz, training.toTraining, category.toCategory, Seq())
       }
     }
+    test
   }
+
 
   override  def updateSubmit(id:Int): Future[Int] = {
     val updateQuery = slickSMS.filter(c => c.id === id).map(c => c.submitted).update(Some(DateTime.now))

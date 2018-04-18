@@ -4,7 +4,7 @@ import com.google.inject.ImplementedBy
 import javax.inject.Inject
 
 import models.caseClasses.SMS
-import models.caseClasses.SMS.UnsentMessages
+import models.caseClasses.SMS._
 import models.daos.SMSDAO
 import models.caseClasses.TestModel
 

@@ -47,5 +47,6 @@ object SMS {
   object UnsentMessages {
     implicit val jsonFormat = Json.format[UnsentMessages]
   }
+
 }
 

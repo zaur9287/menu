@@ -22,14 +22,14 @@ s
 
 val hashids = new Hashids
 var smsID=0
-val id:Int = 8
+val id:Int = 1
 var st = ""
 try
   st= hashids.encode(id)
 catch{
   case ex:ConvertException=>println("There is error")
 }
-
+st
 st = "k5"
 
 try

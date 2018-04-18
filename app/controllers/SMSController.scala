@@ -4,7 +4,7 @@ package controllers
 import javax.inject._
 
 import com.mohiva.play.silhouette.api.Silhouette
-import models.caseClasses.SMS
+import models.caseClasses.{SMS, TestModel}
 import models.caseClasses.SMS._
 import models.services.SMSService
 import org.joda.time.DateTime
@@ -54,13 +54,12 @@ class SMSController @Inject()(
   }
 
   def getQuiz(id: String) = silhouette.UnsecuredAction.async{ implicit request=>
-    thisService.getQuiz(id).map(r=> Ok(Json.obj("result"->r)))
+    thisService.getQuiz(id).map(r=>Ok(Json.obj("result"->r)))
   }
 
   def unsentMessages = silhouette.SecuredAction.async {implicit request=>
     thisService.unsentMessages.map(r=>Ok(Json.toJson(r)))
   }
-
 
 
 }
