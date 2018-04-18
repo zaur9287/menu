@@ -125,6 +125,7 @@ POST    /v1/sms/sendmessages                controllers.SMSController.sendMessag
 GET     /v1/front/quiz/:id                  controllers.SMSController.getQuiz(id: String)
 PUT     /v1/result/submitresult/:id         controllers.ResultController.SubmitResult(id:String)
 POST    /v1/allreport                       controllers.ResultController.allReport
+GET     /v1/unsentmessages                  controllers.SMSController.unsentMessages
 
 # Home page
 GET         /                                controllers.ApplicationController.index

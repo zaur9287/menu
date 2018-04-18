@@ -36,5 +36,16 @@ object SMS {
       "quizID"        -> number
     )(SentFormSMS.apply)(SentFormSMS.unapply)
   )
+
+  case class UnsentMessages (
+                            quizID:Int,
+                            quizName:String,
+                            categoryID:Int,
+                            categoryName:String,
+                            status:Boolean
+                            )
+  object UnsentMessages {
+    implicit val jsonFormat = Json.format[UnsentMessages]
+  }
 }
 

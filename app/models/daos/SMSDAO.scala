@@ -4,7 +4,7 @@ import java.util.UUID
 
 import org.joda.time.DateTime
 import com.google.inject.{ImplementedBy, Inject}
-import models.caseClasses.{SMS, TestAnswer, TestModel, TestQuestion}
+import models.caseClasses._
 import models.caseClasses.SMS._
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.ws.WSClient
@@ -21,6 +21,7 @@ trait SMSDAO {
   def sendSMS                                 : Future[Option[Int]]
   def getQuiz(id:String)                      : Future[Option[TestModel]]
   def updateSubmit(id:Int)                    : Future[Int]
+  def unsentMessages                          : Future[Seq[UnsentMessages]]
 }
 
 class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,wSClient: WSClient)(implicit executionContext: ExecutionContext)  extends SMSDAO with DBTableDefinitions {
@@ -133,6 +134,18 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
   private def updateStatus(ids: Seq[Int], status: String): Future[Int] = {
     val updateQuery = slickSMS.filter(c => c.id inSet(ids)).map(_.status).update(status)
     db.run(updateQuery)
+  }
+
+
+  override def unsentMessages: Future[Seq[UnsentMessages]] = {
+    val q = slickSMS.join(slickQuizzes.filter(_.deletedAt.isEmpty)).on(_.quizID === _.id)
+      .join(slickCategories.filter(_.deletedAt.isEmpty)).on(_._1.categoryID === _.id)
+      .result.map(_.map(r => {
+      val ((sms, quiz), category) = r
+      (quiz.id, quiz.name, category.id, category.name,sms.status!="pending")
+    }))
+    for{  res<- db.run(q)
+    } yield res.map(r=>UnsentMessages(r._1,r._2,r._3,r._4,r._5))
   }
 }
 

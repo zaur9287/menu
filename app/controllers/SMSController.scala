@@ -55,13 +55,12 @@ class SMSController @Inject()(
 
   def getQuiz(id: String) = silhouette.UnsecuredAction.async{ implicit request=>
     thisService.getQuiz(id).map(r=> Ok(Json.obj("result"->r)))
-    //burda implicit birsey isteyecek
-    //
-
-
-
-
   }
+
+  def unsentMessages = silhouette.SecuredAction.async {implicit request=>
+    thisService.unsentMessages.map(r=>Ok(Json.toJson(r)))
+  }
+
 
 
 }

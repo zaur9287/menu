@@ -4,6 +4,7 @@ import com.google.inject.ImplementedBy
 import javax.inject.Inject
 
 import models.caseClasses.SMS
+import models.caseClasses.SMS.UnsentMessages
 import models.daos.SMSDAO
 import models.caseClasses.TestModel
 
@@ -20,6 +21,7 @@ trait SMSService {
   def findUnSubmitted(id: Int)          :Future[Boolean]
   def sendSMS                           :Future[Option[Int]]
   def getQuiz(id:String)                :Future[Option[TestModel]]
+  def unsentMessages                    :Future[Seq[UnsentMessages]]
 }
 
 class SMSServiceImpl @Inject()(DAO: SMSDAO) extends SMSService {
@@ -30,4 +32,5 @@ class SMSServiceImpl @Inject()(DAO: SMSDAO) extends SMSService {
   override def findUnSubmitted(id:Int):Future[Boolean]                          = DAO.findUnSubmitted(id)
   override def sendSMS: Future[Option[Int]]                                     = DAO.sendSMS
   override def getQuiz(id: String): Future[Option[TestModel]]                   = DAO.getQuiz(id)
+  override def unsentMessages: Future[Seq[UnsentMessages]]                      = DAO.unsentMessages
 }
