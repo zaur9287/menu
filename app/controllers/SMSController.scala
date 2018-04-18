@@ -54,7 +54,16 @@ class SMSController @Inject()(
   }
 
   def getQuiz(id: String) = silhouette.UnsecuredAction.async{ implicit request=>
-    thisService.getQuiz(id).map(r=>Ok(Json.obj("result"->r)))
+    thisService.getQuiz(id).map(r=>
+      if(r.isDefined){
+        val testModel = r.get
+        if (testModel.questions.length==0){
+          Ok(Json.obj("result"->None,"training_name"->testModel.training.name,"quiz_name"->testModel.quiz.name))
+        }else
+          Ok(Json.obj("result"->r))
+      }
+      else Ok(Json.obj("result"->0))
+    )
   }
 
   def unsentMessages = silhouette.SecuredAction.async {implicit request=>
