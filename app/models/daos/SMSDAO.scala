@@ -142,10 +142,18 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
       .join(slickCategories.filter(_.deletedAt.isEmpty)).on(_._1.categoryID === _.id)
       .result.map(_.map(r => {
       val ((sms, quiz), category) = r
-      (quiz.id, quiz.name, category.id, category.name,sms.status!="pending")
+      (quiz.id, quiz.name, category.id, category.name,sms.status!="pending" )
     }))
-    for{  res<- db.run(q)
-    } yield res.map(r=>UnsentMessages(r._1,r._2,r._3,r._4,r._5))
+
+    for{
+      res<- db.run(q)
+    } yield {
+      val test = res.groupBy(r=>(r._1,r._3,r._5)).map(r=>{
+        r._2.map(r=>UnsentMessages(r._1,r._2,r._3,r._4,r._5))
+      })
+      test.toSeq.flatten
+    }
+
   }
 }
 
