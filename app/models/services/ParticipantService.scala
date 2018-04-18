@@ -18,7 +18,7 @@ trait ParticipantService {
   def pureDeleteAll                     :Future[Int]
   def delete(id:Int)                    :Future[Int]
   def deleteAll                         :Future[Int]
-  def update(id: Int, updateForm        :UpdateFormParticipant):Future[Option[Participant]]
+  def update(id: Int, updateForm:UpdateFormParticipant):Future[Int]
   def findByID(id: Int)                 :Future[Option[Participant]]
   def findByCategoryID(id: Int)         :Future[Seq[Participant]]
 }
@@ -34,7 +34,7 @@ class ParticipantServiceImpl @Inject()(DAO: ParticipantsDAO) extends Participant
   override def create(el: Participant): Future[Option[Participant]]             = DAO.create(el)
   override def delete(id:Int): Future[Int]                                      = DAO.delete(id)
   override def deleteAll: Future[Int]                                           = DAO.deleteAll
-  override def update(id: Int, updateForm: UpdateFormParticipant): Future[Option[Participant]] = DAO.update(id, updateForm)
+  override def update(id: Int, updateForm: UpdateFormParticipant): Future[Int]  = DAO.update(id, updateForm)
   override def findByID(id:Int):Future[Option[Participant]]                     = DAO.findByID(id)
   override def findByCategoryID(id:Int):Future[Seq[Participant]]                = DAO.findByCategoryID(id)
   override def pureDelete(id:Int):Future[Int]                                   = DAO.pureDelete(id)

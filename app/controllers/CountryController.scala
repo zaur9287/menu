@@ -65,13 +65,7 @@ class CountryController @Inject()(
     CountryForms.updateForm.bindFromRequest().fold(
       formWithErrors => Future(BadRequest(Json.toJson(formWithErrors.errors.map(e => Json.obj("key" -> e.key, "message" -> e.message))))),
       data => {
-        countryService.update(id, data).map( r =>
-          if(r.isDefined){
-            Ok(Json.toJson(r.get))
-          } else {
-            BadRequest(Json.obj("status" -> "KO", "message" -> "could not create data."))
-          }
-        )
+        countryService.update(id, data).map( r =>Ok(Json.toJson(r)))
       }
     )
   }

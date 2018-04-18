@@ -16,7 +16,7 @@ trait QuizzesDAO {
   def pureDeleteAll: Future[Int]
   def delete(selectedID:Int): Future[Int]
   def deleteAll: Future[Int]
-  def update(id:Int,updateForm: UpdateFormQuiz): Future[Option[Quiz]]
+  def update(id:Int,updateForm: UpdateFormQuiz): Future[Int]
   def findBySearchForm(tID:Int,cID:Int): Future[Seq[Quiz]]
   def findByID(id: Int): Future[Option[Quiz]]
   def findByCategoryID(id: Int): Future[Seq[Quiz]]
@@ -75,20 +75,11 @@ class QuizzesDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigPr
     affectedRowsCount
   }
 
-  override  def update(id:Int,updateForm: UpdateFormQuiz): Future[Option[Quiz]] = {
+  override  def update(id:Int,updateForm: UpdateFormQuiz): Future[Int] = {
     val updateQuery = slickQuizzes.filter(c => c.id === id && c.deletedAt.isEmpty)
       .map(c => (c.name,c.spiker,c.trainingID,c.categoryID, c.updatedAt))
       .update((updateForm.name,updateForm.spiker,updateForm.trainingID,updateForm.categoryID, DateTime.now))
-
-    val result = for {
-      getUpdated <- findByID(id)
-      updateRowCount <- if(getUpdated.isDefined){ db.run(updateQuery) } else { Future(0) }
-    } yield {
-      if(updateRowCount > 0){
-        getUpdated.map(c => c.copy(id = id,name = updateForm.name,spiker = updateForm.spiker, updatedAt = c.updatedAt,createdAt = c.createdAt,deletedAt = c.deletedAt))
-      } else {None}
-    }
-    result
+    db.run(updateQuery)
   }
 
   override def findByID(id:Int): Future[Option[Quiz]] = {

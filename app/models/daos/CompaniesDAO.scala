@@ -16,7 +16,7 @@ trait CompaniesDAO {
   def pureDeleteAll: Future[Int]
   def delete(selectedID:Int): Future[Int]
   def deleteAll: Future[Int]
-  def update(id:Int,updateCompanyForm: UpdateCompanyForm): Future[Option[Company]]
+  def update(id:Int,updateCompanyForm: UpdateCompanyForm): Future[Int]
   def findCompanyByID(Companyid: Int): Future[Option[Company]]
 }
 
@@ -50,21 +50,12 @@ class CompaniesDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfig
     val affectedRowsCount:Future[Int] = db.run(deletingAllAction)
     affectedRowsCount
   }
-//göndərilmiş məlumatların update olunması. və update olunmuş sətrin geri qaytarılması
-  override  def update(id:Int,updateCompanyForm: UpdateCompanyForm): Future[Option[Company]] = {
+
+  override  def update(id:Int,updateCompanyForm: UpdateCompanyForm): Future[Int] = {
     val updateQuery = slickCompanies.filter(c => c.id === id && c.deleted_at.isEmpty)
       .map(c => (c.name, c.desc, c.updated_at))
       .update((updateCompanyForm.name, Some(updateCompanyForm.description), DateTime.now))
-
-    val result = for {
-      getUpdatedCompany <- findCompanyByID(id)
-      updateRowCount <- if(getUpdatedCompany.isDefined){ db.run(updateQuery) } else { Future(0) }
-    } yield {
-      if(updateRowCount > 0){
-        getUpdatedCompany.map(c => c.copy(name = updateCompanyForm.name, description = Some(updateCompanyForm.description), updatedAt = c.updatedAt))
-      } else {None}
-    }
-    result
+    db.run(updateQuery)
  }
 //id-yə görə birinin tapılması
   override def findCompanyByID(Companyid:Int): Future[Option[Company]] = {

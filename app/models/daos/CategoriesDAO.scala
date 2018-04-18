@@ -15,7 +15,7 @@ trait CategoriesDAO {
   def pureDeleteAll: Future[Int]
   def delete(selectedID:Int): Future[Int]
   def deleteAll: Future[Int]
-  def update(id:Int,updateForm: UpdateFormCategory): Future[Option[Category]]
+  def update(id:Int,updateForm: UpdateFormCategory): Future[Int]
   def findByID(id: Int): Future[Option[Category]]
 }
 
@@ -62,20 +62,11 @@ class CategoriesDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfi
     affectedRowsCount
   }
 
-  override  def update(id:Int,updateForm: UpdateFormCategory): Future[Option[Category]] = {
+  override  def update(id:Int,updateForm: UpdateFormCategory): Future[Int] = {
     val updateQuery = slickCategories.filter(c => c.id === id && c.deletedAt.isEmpty)
       .map(c => (c.name, c.updatedAt))
       .update((updateForm.name, DateTime.now))
-
-    val result = for {
-      getUpdated <- findByID(id)
-      updateRowCount <- if(getUpdated.isDefined){ db.run(updateQuery) } else { Future(0) }
-    } yield {
-      if(updateRowCount > 0){
-        getUpdated.map(c => c.copy(id = id,name = updateForm.name, updatedAt = c.updatedAt,createdAt = c.createdAt,deletedAt = c.deletedAt))
-      } else {None}
-    }
-    result
+    db.run(updateQuery)
   }
 
   override def findByID(clientid:Int): Future[Option[Category]] = {

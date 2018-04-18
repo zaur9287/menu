@@ -16,7 +16,7 @@ trait ContactsDAO {
   def pureDeleteAll: Future[Int]
   def delete(selectedID:Int): Future[Int]
   def deleteAll: Future[Int]
-  def update(id:Int,updateselectAllContactsForm: UpdateContactForm): Future[Option[Contact]]
+  def update(id:Int,updateselectAllContactsForm: UpdateContactForm): Future[Int]
   def findContactByID(id: Int): Future[Option[Contact]]
   def findContactByClientID(id: Int): Future[Option[(Client, Seq[Contact])]]
 }
@@ -51,21 +51,12 @@ class ContactsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigP
     val affectedRowsCount:Future[Int] = db.run(deletingAllAction)
     affectedRowsCount
   }
-//göndərilmiş məlumatların update olunması. və update olunmuş sətrin geri qaytarılması
-  override def update(id:Int,updateContactForm: UpdateContactForm): Future[Option[Contact]] = {
+
+  override def update(id:Int,updateContactForm: UpdateContactForm): Future[Int] = {
     val updateQuery = slickContacts.filter(c => c.id === id && c.deleted_at.isEmpty)
       .map(c => (c.client_id ,c.mobile, c.desc, c.updated_at))
       .update((updateContactForm.client_id, updateContactForm.mobile,updateContactForm.description, DateTime.now))
-
-    val result = for {
-      getUpdatedContact <- findContactByID(id)
-      updateRowCount <- if(getUpdatedContact.isDefined){ db.run(updateQuery) } else { Future(0) }
-    } yield {
-      if(updateRowCount > 0){
-        getUpdatedContact.map(c => c.copy(client_id = updateContactForm.client_id, mobile = updateContactForm.mobile, description = updateContactForm.description, updatedAt = c.updatedAt))
-      } else {None}
-    }
-    result
+    db.run(updateQuery)
  }
 //id-yə görə birinin tapılması
   override def findContactByID(id:Int): Future[Option[Contact]] = {

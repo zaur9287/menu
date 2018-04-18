@@ -18,7 +18,7 @@ trait InterfacesDAO {
   def pureDeleteAll: Future[Int]
   def delete(selectedID:Int): Future[Int]
   def deleteAll: Future[Int]
-  def update(id:Int,updateInterfaceForm: UpdateInterfaceForm): Future[Option[Interface]]
+  def update(id:Int,updateInterfaceForm: UpdateInterfaceForm): Future[Int]
   def findInterfaceByID(id: Int): Future[Option[Interface]]
 }
 
@@ -52,28 +52,19 @@ class InterfacesDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfi
     val affectedRowsCount:Future[Int] = db.run(deletingAllAction)
     affectedRowsCount
   }
-//göndərilmiş məlumatların update olunması. və update olunmuş sətrin geri qaytarılması
-  override  def update(id:Int,updateInterfaceForm: UpdateInterfaceForm): Future[Option[Interface]] = {
+
+  override  def update(id:Int,updateInterfaceForm: UpdateInterfaceForm): Future[Int] = {
     val updateQuery = slickInterfaces.filter(c => c.id === id && c.deleted_at.isEmpty)
       .map(c => (c.name, c.desc, c.updated_at))
       .update((updateInterfaceForm.name, Some(updateInterfaceForm.description),  DateTime.now))
-
-    val result = for {
-      getUpdatedInterface <- findInterfaceByID(id)
-      updateRowCount <- if(getUpdatedInterface.isDefined){ db.run(updateQuery) } else { Future(0) }
-    } yield {
-      if(updateRowCount > 0){
-        getUpdatedInterface.map(c => c.copy(name = updateInterfaceForm.name, description = Some(updateInterfaceForm.description), updatedAt = c.updatedAt))
-      } else {None}
-    }
-    result
+    db.run(updateQuery)
  }
-//id-yə görə birinin tapılması
+
   override def findInterfaceByID(id:Int): Future[Option[Interface]] = {
     val query = slickInterfaces.filter(f=>f.id === id && f.deleted_at.isEmpty).result
     db.run(query.headOption).map(_.map(_.toInterfaces))
   }
-//id-yə görə birinin silinməsi (bazada silinmə tarixinin update olunması)
+
   override def pureDelete(id:Int): Future[Int] = {
     val query = slickInterfaces.filter(f=>f.id === id && f.deleted_at.isEmpty).map(c=>(c.deleted_at)).update(Some(DateTime.now))
     db.run(query).map(r=>r)

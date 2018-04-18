@@ -18,7 +18,7 @@ trait UsersDAO {
   def find(userID: UUID): Future[Option[User]]
   def findEmail(email: String): Future[Option[User]]
   def save(user: User): Future[User]
-  def update(id:String,user: User): Future[Option[User]]
+  def update(id:String,user: User): Future[Int]
 }
 
 class UsersDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)  extends UsersDAO with DBTableDefinitions {
@@ -56,22 +56,11 @@ class UsersDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProv
 
 
   //göndərilmiş məlumatların update olunması. və update User sətrin geri qaytarılması
-  override  def update(id:String,user: User): Future[Option[User]] = {
+  override  def update(id:String,user: User): Future[Int] = {
     val updateQuery = slickUsers.filter(u => u.id === id)
       .map(u => (u.fullName, u.avatarURL,u.activated))
       .update((user.fullName, user.avatarURL,user.activated))
-
-    val result = for {
-      getUpdated <- find(UUID.fromString(id))
-      updateRowCount <- if(getUpdated.isDefined){ db.run(updateQuery) } else { Future(0) }
-    } yield {
-      if(updateRowCount > 0){
-        getUpdated.map(u => u.copy(fullName = u.fullName,loginInfo = LoginInfo("",""),email = u.email, avatarURL=u.avatarURL, activated= u.activated))
-      } else {
-        None
-      }
-    }
-    result
+    db.run(updateQuery)
   }
 
 

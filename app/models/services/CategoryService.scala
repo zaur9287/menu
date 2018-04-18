@@ -18,7 +18,7 @@ trait CategoryService {
   def pureDeleteAll                     :Future[Int]
   def delete(id:Int)                    :Future[Int]
   def deleteAll                         :Future[Int]
-  def update(id: Int, updateForm        :UpdateFormCategory):Future[Option[Category]]
+  def update(id: Int, updateForm        :UpdateFormCategory):Future[Int]
   def findByID(id: Int)                 :Future[Option[Category]]
 }
 
@@ -33,7 +33,7 @@ class CategoryServiceImpl @Inject()(DAO: CategoriesDAO) extends CategoryService 
   override def create(el: Category): Future[Option[Category]]                   = DAO.create(el)
   override def delete(id:Int): Future[Int]                                      = DAO.delete(id)
   override def deleteAll: Future[Int]                                           = DAO.deleteAll
-  override def update(id: Int, updateForm: UpdateFormCategory): Future[Option[Category]] = DAO.update(id, updateForm)
+  override def update(id: Int, updateForm: UpdateFormCategory): Future[Int]     = DAO.update(id, updateForm)
   override def findByID(id:Int):Future[Option[Category]]                        = DAO.findByID(id)
   override def pureDelete(id:Int):Future[Int]                                   = DAO.pureDelete(id)
   override def pureDeleteAll:Future[Int]                                        = DAO.pureDeleteAll

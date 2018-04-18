@@ -18,7 +18,7 @@ trait CompanyService {
   def pureDeleteAll                                         :Future[Int]
   def delete(selectedID:Int)                                :Future[Int]
   def deleteAll                                             :Future[Int]
-  def update(id: Int, updateCompanyForm: UpdateCompanyForm) :Future[Option[Company]]
+  def update(id: Int, updateCompanyForm: UpdateCompanyForm) :Future[Int]
   def findCompanyByID(id: Int)                              :Future[Option[Company]]
 }
 
@@ -33,7 +33,7 @@ class CompaniesDAOServiceImpl @Inject()(CompaniesDAO: CompaniesDAO) extends Comp
   override def create(Company: Company): Future[Option[Company]]          = CompaniesDAO.create(Company)
   override def delete(selectedID:Int): Future[Int]                        = CompaniesDAO.delete(selectedID)
   override def deleteAll: Future[Int]                                     = CompaniesDAO.deleteAll
-  override def update(id: Int, updateCompanyForm: UpdateCompanyForm): Future[Option[Company]] = CompaniesDAO.update(id, updateCompanyForm)
+  override def update(id: Int, updateCompanyForm: UpdateCompanyForm): Future[Int] = CompaniesDAO.update(id, updateCompanyForm)
   override def findCompanyByID(id:Int):Future[Option[Company]]            = CompaniesDAO.findCompanyByID(id)
   override def pureDelete(id:Int):Future[Int]                             = CompaniesDAO.pureDelete(id)
   override def pureDeleteAll:Future[Int]                                  = CompaniesDAO.pureDeleteAll

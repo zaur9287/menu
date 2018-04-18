@@ -15,7 +15,7 @@ trait ParticipantsDAO {
   def pureDeleteAll: Future[Int]
   def delete(selectedID:Int): Future[Int]
   def deleteAll: Future[Int]
-  def update(id:Int,updateForm: UpdateFormParticipant): Future[Option[Participant]]
+  def update(id:Int,updateForm: UpdateFormParticipant): Future[Int]
   def findByID(id: Int): Future[Option[Participant]]
   def findByCategoryID(id: Int): Future[Seq[Participant]]
 }
@@ -65,20 +65,11 @@ class ParticipantsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseCon
     affectedRowsCount
   }
 
-  override  def update(id:Int,updateForm: UpdateFormParticipant): Future[Option[Participant]] = {
+  override  def update(id:Int,updateForm: UpdateFormParticipant): Future[Int] = {
     val updateQuery = slickParticipants.filter(c => c.id === id && c.deletedAt.isEmpty)
       .map(c => (c.name,c.phone,c.company,c.categoryID, c.updatedAt))
       .update((updateForm.name,updateForm.phone,updateForm.company,updateForm.categoryID, DateTime.now))
-
-    val result = for {
-      getUpdated <- findByID(id)
-      updateRowCount <- if(getUpdated.isDefined){ db.run(updateQuery) } else { Future(0) }
-    } yield {
-      if(updateRowCount > 0){
-        getUpdated.map(c => c.copy(id = id,name = updateForm.name,phone = c.phone, updatedAt = c.updatedAt,createdAt = c.createdAt,deletedAt = c.deletedAt))
-      } else {None}
-    }
-    result
+    db.run(updateQuery)
   }
 
   override def findByID(clientid:Int): Future[Option[Participant]] = {

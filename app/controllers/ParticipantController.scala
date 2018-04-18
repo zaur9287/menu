@@ -66,13 +66,7 @@ class ParticipantController @Inject()(
       formWithErrors => Future(BadRequest(Json.toJson(formWithErrors.errors.map(e => Json.obj("key" -> e.key, "message" -> e.message))))),
       data => {
         var testData = Participant.UpdateFormParticipant(data.name,normalizePhoneNumber(data.phone),data.company,data.categoryID)
-        thisService.update(id, testData).map( r =>
-          if(r.isDefined){
-            Ok(Json.toJson(r.get))
-          } else {
-            BadRequest(Json.obj("status" -> "KO", "message" -> "could not create data."))
-          }
-        )
+        thisService.update(id, testData).map( r => Ok(Json.toJson(r)))
       }
     )
   }

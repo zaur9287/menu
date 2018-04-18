@@ -73,13 +73,7 @@ class ContactController @Inject()(
     ContactForms.updateForm.bindFromRequest().fold(
       formWithErrors => Future(BadRequest(Json.toJson(formWithErrors.errors.map(e => Json.obj("key" -> e.key, "message" -> e.message))))),
       data => {
-        contactService.update(id, data).map( r =>
-          if(r.isDefined){
-            Ok(Json.toJson(r.get))
-          } else {
-            BadRequest(Json.obj("status" -> "KO", "message" -> "could not create data."))
-          }
-        )
+        contactService.update(id, data).map( r =>Ok(Json.toJson(r)))
       }
     )
   }

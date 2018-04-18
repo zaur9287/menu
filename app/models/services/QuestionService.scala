@@ -18,7 +18,7 @@ trait QuestionService {
   def pureDeleteAll                                   :Future[Int]
   def delete(id:Int)                                  :Future[Int]
   def deleteAll                                       :Future[Int]
-  def update(id: Int, updateForm:UpdateFormQuestion)  :Future[Option[Question]]
+  def update(id: Int, updateForm:UpdateFormQuestion)  :Future[Int]
   def findByID(id: Int)                               :Future[Option[Question]]
   def findByQuizID(id: Int)                           :Future[Seq[Question]]
 }
@@ -34,7 +34,7 @@ class QuestionServiceImpl @Inject()(DAO: QuestionsDAO) extends QuestionService {
   override def create(el: Question): Future[Option[Question]]                   = DAO.create(el)
   override def delete(id:Int): Future[Int]                                      = DAO.delete(id)
   override def deleteAll: Future[Int]                                           = DAO.deleteAll
-  override def update(id: Int, updateForm: UpdateFormQuestion): Future[Option[Question]] = DAO.update(id, updateForm)
+  override def update(id: Int, updateForm: UpdateFormQuestion): Future[Int] = DAO.update(id, updateForm)
   override def pureDelete(id:Int):Future[Int]                                   = DAO.pureDelete(id)
   override def pureDeleteAll:Future[Int]                                        = DAO.pureDeleteAll
   override def findByID(id:Int):Future[Option[Question]]                        = DAO.findByID(id)

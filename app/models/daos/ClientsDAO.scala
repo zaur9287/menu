@@ -17,7 +17,7 @@ trait ClientsDAO {
   def pureDeleteAll: Future[Int]
   def delete(selectedID:Int): Future[Int]
   def deleteAll: Future[Int]
-  def update(id:Int,updateClientForm: UpdateClientForm): Future[Option[Client]]
+  def update(id:Int,updateClientForm: UpdateClientForm): Future[Int]
   def findClientByID(clientid: Int): Future[Option[Client]]
 }
 
@@ -51,21 +51,13 @@ class ClientsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigPr
     val affectedRowsCount:Future[Int] = db.run(deletingAllAction)
     affectedRowsCount
   }
-//göndərilmiş məlumatların update olunması. və update olunmuş sətrin geri qaytarılması
-  override  def update(id:Int,updateClientForm: UpdateClientForm): Future[Option[Client]] = {
+
+  override  def update(id:Int,updateClientForm: UpdateClientForm): Future[Int] = {
     val updateQuery = slickClients.filter(c => c.id === id && c.deleted_at.isEmpty)
       .map(c => (c.name, c.desc, c.expire_date, c.updated_at))
       .update((updateClientForm.name, Some(updateClientForm.description), DateTime.parse(updateClientForm.expireDate), DateTime.now))
 
-    val result = for {
-      getUpdatedClient <- findClientByID(id)
-      updateRowCount <- if(getUpdatedClient.isDefined){ db.run(updateQuery) } else { Future(0) }
-    } yield {
-      if(updateRowCount > 0){
-        getUpdatedClient.map(c => c.copy(name = updateClientForm.name, description = Some(updateClientForm.description), expireDate = DateTime.parse(updateClientForm.expireDate), updatedAt = c.updatedAt))
-      } else {None}
-    }
-    result
+    db.run(updateQuery)
  }
 //id-yə görə birinin tapılması
   override def findClientByID(clientid:Int): Future[Option[Client]] = {

@@ -16,7 +16,7 @@ trait CountriesDAO {
   def pureDeleteAll: Future[Int]
   def delete(selectedID:Int): Future[Int]
   def deleteAll: Future[Int]
-  def update(id:Int,updateCountryForm: UpdateCountryForm): Future[Option[Country]]
+  def update(id:Int,updateCountryForm: UpdateCountryForm): Future[Int]
   def findCountryByID(Countryid: Int): Future[Option[Country]]
 }
 
@@ -50,23 +50,14 @@ class CountriesDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfig
     val affectedRowsCount:Future[Int] = db.run(deletingAllAction)
     affectedRowsCount
   }
-//göndərilmiş məlumatların update olunması. və update olunmuş sətrin geri qaytarılması
-  override  def update(id:Int,updateCountryForm: UpdateCountryForm): Future[Option[Country]] = {
+
+  override  def update(id:Int,updateCountryForm: UpdateCountryForm): Future[Int] = {
     val updateQuery = slickCountries.filter(c => c.id === id && c.deleted_at.isEmpty)
       .map(c => (c.name, c.desc, c.updated_at))
       .update((updateCountryForm.name, Some(updateCountryForm.description), DateTime.now))
-
-    val result = for {
-      getUpdatedCountry <- findCountryByID(id)
-      updateRowCount <- if(getUpdatedCountry.isDefined){ db.run(updateQuery) } else { Future(0) }
-    } yield {
-      if(updateRowCount > 0){
-        getUpdatedCountry.map(c => c.copy(name = updateCountryForm.name, description = Some(updateCountryForm.description), updatedAt = c.updatedAt))
-      } else {None}
-    }
-    result
+    db.run(updateQuery)
  }
-//id-yə görə birinin tapılması
+
   override def findCountryByID(Countryid:Int): Future[Option[Country]] = {
     val query = slickCountries.filter(f=>f.id === Countryid && f.deleted_at.isEmpty).result
     db.run(query.headOption).map(_.map(_.toCountries))

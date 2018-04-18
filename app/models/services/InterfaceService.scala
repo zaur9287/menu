@@ -18,7 +18,7 @@ trait InterfaceService {
   def pureDeleteAll                     :Future[Int]
   def delete(selectedID:Int)            :Future[Int]
   def deleteAll                         :Future[Int]
-  def update(id: Int, updateInterfaceForm  :UpdateInterfaceForm):Future[Option[Interface]]
+  def update(id: Int, updateInterfaceForm  :UpdateInterfaceForm):Future[Int]
   def findInterfaceByID(id: Int)     :Future[Option[Interface]]
 }
 
@@ -33,7 +33,7 @@ class InterfaceServiceImpl @Inject()(interfaceDAO: InterfacesDAO) extends Interf
   override def create(currRow: Interface): Future[Option[Interface]]            = interfaceDAO.create(currRow)
   override def delete(selectedID:Int): Future[Int]                              = interfaceDAO.delete(selectedID)
   override def deleteAll: Future[Int]                                           = interfaceDAO.deleteAll
-  override def update(id: Int, updateInterfaceForm: UpdateInterfaceForm): Future[Option[Interface]] = interfaceDAO.update(id, updateInterfaceForm)
+  override def update(id: Int, updateInterfaceForm: UpdateInterfaceForm): Future[Int] = interfaceDAO.update(id, updateInterfaceForm)
   override def findInterfaceByID(id:Int):Future[Option[Interface]]              = interfaceDAO.findInterfaceByID(id)
   override def pureDelete(id:Int):Future[Int]                                   = interfaceDAO.pureDelete(id)
   override def pureDeleteAll:Future[Int]                                        = interfaceDAO.pureDeleteAll

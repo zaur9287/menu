@@ -18,7 +18,7 @@ trait ClientService {
   def pureDeleteAll                     :Future[Int]
   def delete(selectedID:Int)            :Future[Int]
   def deleteAll                         :Future[Int]
-  def update(id: Int, updateClientForm  :UpdateClientForm):Future[Option[Client]]
+  def update(id: Int, updateClientForm  :UpdateClientForm):Future[Int]
   def findClientByID(clientid: Int)     :Future[Option[Client]]
 }
 
@@ -33,7 +33,7 @@ class ClientServiceImpl @Inject()(clientsDAO: ClientsDAO) extends ClientService 
   override def create(client: Client): Future[Option[Client]]                   = clientsDAO.create(client)
   override def delete(selectedID:Int): Future[Int]                              = clientsDAO.delete(selectedID)
   override def deleteAll: Future[Int]                                           = clientsDAO.deleteAll
-  override def update(id: Int, updateClientForm: UpdateClientForm): Future[Option[Client]] = clientsDAO.update(id, updateClientForm)
+  override def update(id: Int, updateClientForm: UpdateClientForm): Future[Int] = clientsDAO.update(id, updateClientForm)
   override def findClientByID(clientid:Int):Future[Option[Client]]              = clientsDAO.findClientByID(clientid)
   override def pureDelete(id:Int):Future[Int]                                   = clientsDAO.pureDelete(id)
   override def pureDeleteAll:Future[Int]                                        = clientsDAO.pureDeleteAll

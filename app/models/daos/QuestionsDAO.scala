@@ -15,7 +15,7 @@ trait QuestionsDAO {
   def pureDeleteAll: Future[Int]
   def delete(selectedID:Int): Future[Int]
   def deleteAll: Future[Int]
-  def update(id:Int,updateForm: UpdateFormQuestion): Future[Option[Question]]
+  def update(id:Int,updateForm: UpdateFormQuestion): Future[Int]
   def findByID(id: Int): Future[Option[Question]]
   def findByQuizID(id: Int): Future[Seq[Question]]
 }
@@ -61,20 +61,11 @@ class QuestionsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfig
     affectedRowsCount
   }
 
-  override  def update(id:Int,updateForm: UpdateFormQuestion): Future[Option[Question]] = {
+  override  def update(id:Int,updateForm: UpdateFormQuestion): Future[Int] = {
     val updateQuery = slickQuestions.filter(c => c.id === id && c.deletedAt.isEmpty)
       .map(c => (c.text,c.weight,c.quizID, c.updatedAt))
       .update((updateForm.text,updateForm.weight,updateForm.quizID, DateTime.now))
-
-    val result = for {
-      getUpdated <- findByID(id)
-      updateRowCount <- if(getUpdated.isDefined){ db.run(updateQuery) } else { Future(0) }
-    } yield {
-      if(updateRowCount > 0){
-        getUpdated.map(c => c.copy(id = id,text = updateForm.text, updatedAt = c.updatedAt,createdAt = c.createdAt,deletedAt = c.deletedAt))
-      } else {None}
-    }
-    result
+    db.run(updateQuery)
   }
 
   override def pureDelete(id:Int): Future[Int] = {

@@ -18,7 +18,7 @@ trait ContactService {
   def pureDeleteAll                     :Future[Int]
   def delete(id:Int)                    :Future[Int]
   def deleteAll                         :Future[Int]
-  def update(id: Int, updateContactForm :UpdateContactForm):Future[Option[Contact]]
+  def update(id: Int, updateContactForm :UpdateContactForm):Future[Int]
   def findContactByID(id: Int)          :Future[Option[Contact]]
   def findContactByClientID(id: Int)    :Future[Option[(Client, Seq[Contact])]]
 }
@@ -34,7 +34,7 @@ class ContactServiceImpl @Inject()(contactsDAO: ContactsDAO) extends ContactServ
   override def create(client: Contact): Future[Option[Contact]]                 = contactsDAO.create(client)
   override def delete(selectedID:Int): Future[Int]                              = contactsDAO.delete(selectedID)
   override def deleteAll: Future[Int]                                           = contactsDAO.deleteAll
-  override def update(id: Int, updateContactForm: UpdateContactForm): Future[Option[Contact]] = contactsDAO.update(id, updateContactForm)
+  override def update(id: Int, updateContactForm: UpdateContactForm): Future[Int] = contactsDAO.update(id, updateContactForm)
   override def findContactByID(id:Int):Future[Option[Contact]]                  = contactsDAO.findContactByID(id)
   override def findContactByClientID(id:Int):Future[Option[(Client, Seq[Contact])]]= contactsDAO.findContactByClientID(id)
   override def pureDelete(id:Int):Future[Int]                                   = contactsDAO.pureDelete(id)

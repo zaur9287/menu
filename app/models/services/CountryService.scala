@@ -18,7 +18,7 @@ trait CountryService {
   def pureDeleteAll                                         :Future[Int]
   def delete(selectedID:Int)                                :Future[Int]
   def deleteAll                                             :Future[Int]
-  def update(id: Int, updateCountryForm: UpdateCountryForm) :Future[Option[Country]]
+  def update(id: Int, updateCountryForm: UpdateCountryForm) :Future[Int]
   def findCountryByID(id: Int)                              :Future[Option[Country]]
 }
 
@@ -33,7 +33,7 @@ class CountriesDAOServiceImpl @Inject()(CountriesDAO: CountriesDAO) extends Coun
   override def create(Country: Country): Future[Option[Country]]          = CountriesDAO.create(Country)
   override def delete(selectedID:Int): Future[Int]                        = CountriesDAO.delete(selectedID)
   override def deleteAll: Future[Int]                                     = CountriesDAO.deleteAll
-  override def update(id: Int, updateCountryForm: UpdateCountryForm): Future[Option[Country]] = CountriesDAO.update(id, updateCountryForm)
+  override def update(id: Int, updateCountryForm: UpdateCountryForm): Future[Int] = CountriesDAO.update(id, updateCountryForm)
   override def findCountryByID(id:Int):Future[Option[Country]]            = CountriesDAO.findCountryByID(id)
   override def pureDelete(id:Int):Future[Int]                             = CountriesDAO.pureDelete(id)
   override def pureDeleteAll:Future[Int]                                  = CountriesDAO.pureDeleteAll
