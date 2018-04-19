@@ -15,10 +15,10 @@ import java.util.regex.Pattern;
 public class Hashids {
   private static final String DEFAULT_ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 
-  private String salt = "";
+  private String salt = "bc00ENaXLU0eqrf4lG3R1UdYAJmaHXVK";
   private String alphabet = "";
   private String seps = "cfhistuCFHISTU";
-  private int minHashLength = 0;
+  private int minHashLength = 5;
   private double sepDiv = 3.5;
   private int guardDiv = 12;
   private int minAlphabetLength = 16;

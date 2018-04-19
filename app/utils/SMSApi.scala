@@ -50,13 +50,12 @@ case class SMSApi  @Inject() (ws: WSClient)
 
   private def sendSmsToAze(smsSeq: Seq[GateWaySMS]): Future[Seq[GateWaySMS]] = {
     val smsWithAzeRecipients = smsSeq
-    val text = GateWaySMS.normalizeString(smsSeq.head.text)
     val futureSeq = smsWithAzeRecipients.map{ sms =>
       val sendSms = ws.url(url_az)
         .addQueryStringParameters("user" -> username_az)
         .addQueryStringParameters("password" -> password_az)
         .addQueryStringParameters("gsm" -> sms.recipient)
-        .addQueryStringParameters("text" -> text).get()
+        .addQueryStringParameters("text" -> GateWaySMS.normalizeString(sms.text)).get()
       sendSms.map(smsSent => {
         println(smsSent.body)
         sms
