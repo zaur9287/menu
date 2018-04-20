@@ -22,7 +22,7 @@ s
 
 val hashids = new Hashids
 var smsID=0
-val id:Int = 10
+val id:Int = 14
 var st = ""
 try
   st= hashids.encode(id)
@@ -30,7 +30,7 @@ catch{
   case ex:ConvertException=>println("There is error")
 }
 st
-//st = "nR"
+st = "Mh"
 
 try
   hashids.decode(st)(0)

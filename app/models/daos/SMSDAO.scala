@@ -4,8 +4,10 @@ import java.util.UUID
 
 import org.joda.time.DateTime
 import com.google.inject.{ImplementedBy, Inject}
+import models.caseClasses.Result.ParticipantLog
 import models.caseClasses._
 import models.caseClasses.SMS._
+import net.minidev.asm.ex.ConvertException
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.ws.WSClient
 import utils.{GateWaySMS, Hashids, SMSApi}
@@ -22,6 +24,7 @@ trait SMSDAO {
   def getQuiz(id:String)                      : Future[Option[TestModel]]
   def updateSubmit(id:Int)                    : Future[Int]
   def unsentMessages                          : Future[Seq[UnsentMessages]]
+  def getParticipantLog(id:Int)               : Future[ParticipantLog]
 }
 
 class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,wSClient: WSClient)(implicit executionContext: ExecutionContext)  extends SMSDAO with DBTableDefinitions {
@@ -88,8 +91,8 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
           }
         })
         for {
-          sendAll <- smsApi.sendSms(recipients)
           updateStatuses <- updateStatus( seq.map(_._1.id) ,"sending")
+          sendAll <- smsApi.sendSms(recipients)
         } yield sendAll
       }
       a <- updateStatus(seq.map(_._1.id), "sent")
@@ -100,14 +103,25 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
   override def getQuiz(id: String): Future[Option[TestModel]] = {
     val hashids = new Hashids
     val smsApi = new SMSApi(wSClient)
-    val smsID = hashids.decode(id)(0).toInt
+    var smsID =0
+    try {
+      smsID = hashids.decode(id)(0).toInt
+    }catch{
+      case ex:ConvertException=> smsID =0
+      case _=>smsID =0
+    }
+
     def q(sID: Int) = slickSMS.filter(f=>f.id === sID)
       .join(slickParticipants.filter(_.deletedAt.isEmpty)).on(_.participantID===_.id)
       .join(slickCategories.filter(_.deletedAt.isEmpty)).on(_._1.categoryID === _.id)
       .join(slickTrainings.filter(_.deletedAt.isEmpty)).on(_._1._1.trainingID === _.id)
       .join(slickQuizzes.filter(_.deletedAt.isEmpty)).on(_._1._1._1.quizID === _.id)
     val test = for {
-      r<-db.run(q(smsID).result.headOption)
+      r<- {
+        val query = q(smsID).result
+        val statements = query.statements
+        db.run(query.headOption)
+      }
       questionsOption <- {
         if(r.isDefined){
           db.run(slickQuestions.filter(k => k.deletedAt.isEmpty && k.quizID === r.get._2.id)
@@ -142,6 +156,10 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
 
 
   override def unsentMessages: Future[Seq[UnsentMessages]] = {
+    val qtest = slickSMS.join(slickQuizzes.filter(_.deletedAt.isEmpty)).on(_.quizID === _.id)
+      .join(slickCategories.filter(_.deletedAt.isEmpty)).on(_._1.categoryID === _.id)
+      .result
+    println(qtest.statements)
     val q = slickSMS.join(slickQuizzes.filter(_.deletedAt.isEmpty)).on(_.quizID === _.id)
       .join(slickCategories.filter(_.deletedAt.isEmpty)).on(_._1.categoryID === _.id)
       .result.map(_.map(r => {
@@ -158,6 +176,18 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
       test.toSeq.flatten
     }
 
+  }
+
+
+  override def getParticipantLog(id: Int): Future[ParticipantLog] = {
+    val q = slickSMS.filter(_.participantID === id)
+      .join(slickQuizzes.filter(_.deletedAt.isEmpty)).on(_.quizID === _.id)
+      //.join(slick)
+    ???
+//    AnswerLog(Answer, Option[Answer])
+//    QuestionLog(Seq[Question], AnswerLog)
+//    QuizLog(Seq[Quiz], Seq[QuestionLog])
+//    ParticipantLog(Participant,Seq[QuizLog])
   }
 }
 
