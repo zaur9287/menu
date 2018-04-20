@@ -24,7 +24,7 @@ trait SMSDAO {
   def getQuiz(id:String)                      : Future[Option[TestModel]]
   def updateSubmit(id:Int)                    : Future[Int]
   def unsentMessages                          : Future[Seq[UnsentMessages]]
-  def getParticipantLog(id:Int)               : Future[ParticipantLog]
+  def getParticipantLog(id:Int)               : Future[Option[ParticipantLog]]
 }
 
 class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,wSClient: WSClient)(implicit executionContext: ExecutionContext)  extends SMSDAO with DBTableDefinitions {
@@ -156,37 +156,67 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
 
 
   override def unsentMessages: Future[Seq[UnsentMessages]] = {
-    val qtest = slickSMS.join(slickQuizzes.filter(_.deletedAt.isEmpty)).on(_.quizID === _.id)
-      .join(slickCategories.filter(_.deletedAt.isEmpty)).on(_._1.categoryID === _.id)
-      .result
-    println(qtest.statements)
     val q = slickSMS.join(slickQuizzes.filter(_.deletedAt.isEmpty)).on(_.quizID === _.id)
       .join(slickCategories.filter(_.deletedAt.isEmpty)).on(_._1.categoryID === _.id)
-      .result.map(_.map(r => {
-      val ((sms, quiz), category) = r
-      (quiz.id, quiz.name, category.id, category.name,sms.status!="pending" )
-    }))
+//      .map(_.map(r => {
+//      val ((sms, quiz), category) = r
+//      (quiz.id, quiz.name, category.id, category.name,sms.status!="pending" )
+//    }))
 
     for{
-      res<- db.run(q)
+      res<- db.run(q.result)
     } yield {
-      val test = res.groupBy(r=>(r._1,r._2,r._3,r._4,r._5)).map(r=>{
-        r._2.map(r=>UnsentMessages(r._1,r._2,r._3,r._4,r._5))
-      })
-      test.toSeq.flatten
+      val tes = res.groupBy(r=>(r._1._1.quizID,r._2.name,  r._1._1.categoryID,r._2.name,r._1._1.status =="pending")).map(r=>
+        UnsentMessages(r._1._1,r._1._2,r._1._3,r._1._4,r._1._5)
+      )
+      tes.toSeq
+      //UnsentMessages (       quizID:Int,quizName:String,categoryID:Int,categoryName:String,status:Boolean)
+        //UnsentMessages(r._1,r._2,r._3,r._4,r._5))
     }
+
 
   }
 
-
-  override def getParticipantLog(id: Int): Future[ParticipantLog] = {
-    val q = slickSMS.filter(_.participantID === id)
+  protected def getQueryParticipantLog(id:Int) = {
+    slickSMS.filter(_.participantID === id)
       .join(slickQuizzes.filter(_.deletedAt.isEmpty)).on(_.quizID === _.id)
-      //.join(slick)
-    ???
+      .join(slickQuestions.filter(_.deletedAt.isEmpty)).on(_._2.id === _.quizID)
+      .join(slickAnswers.filter(_.deletedAt.isEmpty)).on(_._2.id === _.questionID)
+      .join(slickParticipants.filter(_.deletedAt.isEmpty)).on(_._1._1._1.participantID === _.id)
+  }
+
+  override def getParticipantLog(id: Int): Future[Option[ParticipantLog]] = {
+    val queryParticipant = slickParticipants.filter(f=>f.id === id && f.deletedAt.isEmpty)
+    val q = getQueryParticipantLog(id).filter(_._1._2.correct === true)
+        .joinLeft(getQueryParticipantLog(id).join(slickResult).on((j,r)=>
+          j._1._2.id === r.answerID && j._1._1._2.id === r.questionID && j._1._1._1._1.id === r.SMSID))
+      .on((j,p)=> (j._1._2.id === p._1._1._2.id && j._2.id === p._1._2.id && //participant
+        j._1._1._2.id === p._1._1._1._2.id && //question
+        j._1._1._1._2.id === p._1._1._1._1._2.id
+                  ))
+    for {
+      run<-db.run(q.result)
+      p<-db.run(queryParticipant.result.headOption)
+    }yield{
+      if(p.isDefined){
+        val test = run.groupBy(_._1._1._1._1._2).map(s=>{ //group by quiz
+          val questionLog = s._2.map(res=>{
+            val ((((sms,quiz),question),answer),participant) = res._1
+            val optionAnswer= if(res._2.isDefined){
+              Some(res._2.get._1._1._2.toAnswer)
+            }else None
+            val answerLog = AnswerLog(answer.toAnswer,optionAnswer)
+            QuestionLog(question.toQuestion,answerLog)
+          })
+          QuizLog(s._1.toQuiz,questionLog)
+        })
+        Some(ParticipantLog(p.get.toParticipant,test.toSeq))
+      }else None
+    }
+
 //    AnswerLog(Answer, Option[Answer])
-//    QuestionLog(Seq[Question], AnswerLog)
-//    QuizLog(Seq[Quiz], Seq[QuestionLog])
+//    QuestionLog(Question, AnswerLog)
+//    QuizLog(Quiz, Seq[QuestionLog])
 //    ParticipantLog(Participant,Seq[QuizLog])
   }
 }

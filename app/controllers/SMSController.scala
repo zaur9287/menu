@@ -71,4 +71,8 @@ class SMSController @Inject()(
   }
 
 
+  def getParticipantLog(id:Int) = silhouette.SecuredAction.async { implicit request =>
+    thisService.getParticipantLog(id).map(r=>Ok(Json.toJson(r)))
+  }
+
 }

@@ -3,10 +3,9 @@ package models.services
 import com.google.inject.ImplementedBy
 import javax.inject.Inject
 
-import models.caseClasses.SMS
+import models.caseClasses.{ParticipantLog, SMS, TestModel}
 import models.caseClasses.SMS._
 import models.daos.SMSDAO
-import models.caseClasses.TestModel
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -22,6 +21,7 @@ trait SMSService {
   def sendSMS                           :Future[Option[Int]]
   def getQuiz(id:String)                :Future[Option[TestModel]]
   def unsentMessages                    :Future[Seq[UnsentMessages]]
+  def getParticipantLog(id:Int)         :Future[Option[ParticipantLog]]
 }
 
 class SMSServiceImpl @Inject()(DAO: SMSDAO) extends SMSService {
@@ -33,4 +33,5 @@ class SMSServiceImpl @Inject()(DAO: SMSDAO) extends SMSService {
   override def sendSMS: Future[Option[Int]]                                     = DAO.sendSMS
   override def getQuiz(id: String): Future[Option[TestModel]]                   = DAO.getQuiz(id)
   override def unsentMessages: Future[Seq[UnsentMessages]]                      = DAO.unsentMessages
+  override def getParticipantLog(id:Int):Future[Option[ParticipantLog]]         = DAO.getParticipantLog(id)
 }

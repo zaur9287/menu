@@ -73,13 +73,13 @@ case class AnswerLog(
 object AnswerLog{implicit val jsonFormat = Json.format[AnswerLog]}
 
 case class QuestionLog(
-                        question: Seq[Question],
+                        question: Question,
                         answerLog: AnswerLog
                       )
 object QuestionLog{implicit val jsonFormat = Json.format[QuestionLog]}
 
 case class QuizLog(
-                    quiz:Seq[Quiz],
+                    quiz:Quiz,
                     questionLog:Seq[QuestionLog]
                   )
 object QuizLog{implicit val jsonFormat = Json.format[QuizLog]}

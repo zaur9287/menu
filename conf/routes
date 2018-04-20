@@ -126,6 +126,7 @@ GET     /v1/front/quiz/:id                  controllers.SMSController.getQuiz(id
 PUT     /v1/result/submitresult/:id         controllers.ResultController.SubmitResult(id:String)
 POST    /v1/allreport                       controllers.ResultController.allReport
 GET     /v1/unsentmessages                  controllers.SMSController.unsentMessages
+GET     /v1/getcustomreport/:id             controllers.SMSController.getParticipantLog(id:Int)
 
 # Home page
 GET         /                                controllers.ApplicationController.index

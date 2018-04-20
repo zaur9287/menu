@@ -24,6 +24,7 @@ val hashids = new Hashids
 var smsID=0
 val id:Int = 5
 var st = ""
+
 try
   st= hashids.encode(id)
 catch{
