@@ -170,7 +170,7 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
     for{
       res<- db.run(q)
     } yield {
-      val test = res.groupBy(r=>(r._1,r._3,r._5)).map(r=>{
+      val test = res.groupBy(r=>(r._1,r._2,r._3,r._4,r._5)).map(r=>{
         r._2.map(r=>UnsentMessages(r._1,r._2,r._3,r._4,r._5))
       })
       test.toSeq.flatten
