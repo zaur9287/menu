@@ -4,7 +4,7 @@ import java.util.UUID
 
 import org.joda.time.DateTime
 import com.google.inject.{ImplementedBy, Inject}
-import models.caseClasses.Result.ParticipantLog
+import models.caseClasses.Result
 import models.caseClasses._
 import models.caseClasses.SMS._
 import net.minidev.asm.ex.ConvertException
@@ -105,7 +105,7 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
     val smsApi = new SMSApi(wSClient)
     var smsID =0
     try {
-      smsID = hashids.decode(id)(0).toInt
+      smsID = hashids.decode(id).headOption.map(_.toInt).getOrElse(0)
     }catch{
       case ex:ConvertException=> smsID =0
       case _=>smsID =0

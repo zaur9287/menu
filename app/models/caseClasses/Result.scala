@@ -51,44 +51,42 @@ object Result {
     )(FilterForm.apply)(FilterForm.unapply)
 
   )
-  case class ReportRow(
-                        participantID:Int,
-                        participantName:String,
-                        categoryName:String,
-                        totalPoint:Option[Int],
-                        countCorrect:Int,
-                        response:Option[Int])
-  object ReportRow{
-    implicit val jsonFormat = Json.format[ReportRow]
-  }
-
-
-  case class AnswerLog(
-                        rightAnswer: Answer,
-                        participantAnswer:Option[Answer]
-                      )
-  object AnswerLog{implicit val jsonFormat = Json.format[AnswerLog]}
-
-  case class QuestionLog(
-                          question: Seq[Question],
-                          answerLog: AnswerLog
-                        )
-  object QuestionLog{implicit val jsonFormat = Json.format[QuestionLog]}
-
-  case class QuizLog(
-                      quiz:Seq[Quiz],
-                      questionLog:Seq[QuestionLog]
-                    )
-  object QuizLog{implicit val jsonFormat = Json.format[QuizLog]}
-
-  case class ParticipantLog(
-                           participant: Participant,
-                           quizLog:Seq[QuizLog]
-                           )
-  object ParticipantLog{implicit val jsonFormat = Json.format[ParticipantLog]}
-
-
 
 }
 
+case class ReportRow(
+                      participantID:Int,
+                      participantName:String,
+                      categoryName:String,
+                      totalPoint:Option[Int],
+                      countCorrect:Int,
+                      response:Option[Int])
+object ReportRow{
+  implicit val jsonFormat = Json.format[ReportRow]
+}
+
+
+case class AnswerLog(
+                      rightAnswer: Answer,
+                      participantAnswer:Option[Answer]
+                    )
+object AnswerLog{implicit val jsonFormat = Json.format[AnswerLog]}
+
+case class QuestionLog(
+                        question: Seq[Question],
+                        answerLog: AnswerLog
+                      )
+object QuestionLog{implicit val jsonFormat = Json.format[QuestionLog]}
+
+case class QuizLog(
+                    quiz:Seq[Quiz],
+                    questionLog:Seq[QuestionLog]
+                  )
+object QuizLog{implicit val jsonFormat = Json.format[QuizLog]}
+
+case class ParticipantLog(
+                           participant: Participant,
+                           quizLog:Seq[QuizLog]
+                         )
+object ParticipantLog{implicit val jsonFormat = Json.format[ParticipantLog]}
 
