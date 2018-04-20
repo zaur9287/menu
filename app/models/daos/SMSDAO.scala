@@ -166,11 +166,11 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
     for{
       res<- db.run(q.result)
     } yield {
-      val tes = res.groupBy(r=>(r._1._1.quizID,r._2.name,  r._1._1.categoryID,r._2.name,r._1._1.status =="pending")).map(r=>
+      val tes = res.groupBy(r=>(r._1._1.quizID,r._1._2.name,  r._1._1.categoryID,r._2.name,r._1._1.status !="pending")).map(r=>
         UnsentMessages(r._1._1,r._1._2,r._1._3,r._1._4,r._1._5)
       )
       tes.toSeq
-      //UnsentMessages (       quizID:Int,quizName:String,categoryID:Int,categoryName:String,status:Boolean)
+      //UnsentMessages (       quizID,quizName,categoryID,categoryName,status)
         //UnsentMessages(r._1,r._2,r._3,r._4,r._5))
     }
 
