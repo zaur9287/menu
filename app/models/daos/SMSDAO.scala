@@ -188,12 +188,13 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
   override def getParticipantLog(id: Int): Future[Option[ParticipantLog]] = {
     val queryParticipant = slickParticipants.filter(f=>f.id === id && f.deletedAt.isEmpty)
     val q = getQueryParticipantLog(id).filter(_._1._2.correct === true)
-        .joinLeft(getQueryParticipantLog(id).join(slickResult).on((j,r)=>
-          j._1._2.id === r.answerID && j._1._1._2.id === r.questionID && j._1._1._1._1.id === r.SMSID))
-      .on((j,p)=> (j._1._2.id === p._1._1._2.id && j._2.id === p._1._2.id && //participant
+      .joinLeft(getQueryParticipantLog(id).join(slickResult)
+        .on((j,r)=> j._1._2.id === r.answerID && j._1._1._2.id === r.questionID && j._1._1._1._1.id === r.SMSID))
+      .on((j,p)=> //j._1._2.id === p._1._1._2.id && j._2.id === p._1._2.id && //sms
+        j._2.id === p._1._2.id && //participant
         j._1._1._2.id === p._1._1._1._2.id && //question
-        j._1._1._1._2.id === p._1._1._1._1._2.id
-                  ))
+        j._1._1._1._2.id === p._1._1._1._1._2.id) //quiz
+    println(q.result.statements)
     for {
       run<-db.run(q.result)
       p<-db.run(queryParticipant.result.headOption)

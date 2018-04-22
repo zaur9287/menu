@@ -70,11 +70,11 @@ class ResultsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigPr
     var query = slickResult.filter(_.correct === true)
       .join(slickSMS.filter(_.submitted.isDefined)).on(_.SMSID === _.id)
       .join(slickParticipants.filter(_.deletedAt.isEmpty)).on(_._2.participantID === _.id)
-      .join(slickCategories.filter(_.deletedAt.isEmpty)).on(_._1._2.categoryID === _.id)
+      .join(slickCategories.filter(_.deletedAt.isEmpty)).on(_._2.categoryID === _.id)
 
 
     tID.foreach(f=>query = query.filter(_._1._1._2.trainingID ===f))
-    cID.foreach(f=>query = query.filter(_._1._1._2.categoryID ===f))
+    cID.foreach(f=>query = query.filter(_._1._2.categoryID ===f))
     qID.foreach(f=>query = query.filter(_._1._1._2.quizID     ===f))
 
     val groupedQuery = query.groupBy( f => {
