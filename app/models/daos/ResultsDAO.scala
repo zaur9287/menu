@@ -86,7 +86,7 @@ class ResultsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigPr
     val selectOnlyQuery = groupedQuery.map( f => {
       val (participantID, participantName, categoryID, categoryName) = f._1
       (participantID, participantName, categoryName, f._2.map(_._1._1._1.weight).sum, f._2.map(_._1._1._1.id).length, f._2.map(_._1._1._1.response).sum)
-    }).sortBy(r=>(r._4 , r._6))
+    }).sortBy(r=>(r._4.desc , r._6))
 
 
     db.run(selectOnlyQuery.result).map(r=>
