@@ -61,7 +61,7 @@ class SMSDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
 
   override  def updateOpened(id:Int): Future[Int] = {
 
-    val updateQuery = slickSMS.filter(c => c.id === id)
+    val updateQuery = slickSMS.filter(c => c.id === id && c.opened.isEmpty)
       .map(c => c.opened)
       .update(Some(DateTime.now()))
       db.run(updateQuery)
