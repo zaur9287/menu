@@ -8,7 +8,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[ResultsDAOImpl])
 trait ResultsDAO {
-  def create(row: Result): Future[Int]
+  def create(row: Result,d:Int=1): Future[Int]
   def createMultiply(rows: Seq[Result]): Future[Int]
   def delete(selectedID:Int): Future[Int]
   def findByID(id: Int): Future[Option[Result]]
@@ -20,7 +20,7 @@ class ResultsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigPr
   import com.github.tototoshi.slick.PostgresJodaSupport._
 
 
-  override def create(row: Result): Future[Int] = {
+  override def create(row: Result,d:Int=1): Future[Int] = {
     for {
       correct<-db.run(slickAnswers.filter(f=>f.deletedAt.isEmpty && f.id === row.answerID && f.questionID === row.questionID )
         .result.headOption).map(r=>
@@ -37,7 +37,7 @@ class ResultsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigPr
         val responseTime = createdAt.flatMap ( sms =>
           sms.opened.map( openedDefined => Seconds.secondsBetween(openedDefined, sms.submitted.get).getSeconds)
         ).getOrElse(0)
-        db.run(slickResult+=DBResult(row.id, row.SMSID,row.questionID,row.answerID, correct, weight,responseTime))
+        db.run(slickResult+=DBResult(row.id, row.SMSID,row.questionID,row.answerID, correct, weight,responseTime/d))
       }
     }yield{
       affected
@@ -48,7 +48,7 @@ class ResultsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigPr
   }
   override def createMultiply(rows: Seq[Result]): Future[Int]= {
     val test = for (
-      res<-rows.map(r=>create(r))
+      res<-rows.map(r=>create(r,rows.length))
     )yield res
     Future.sequence(test).map(_.length)
   }

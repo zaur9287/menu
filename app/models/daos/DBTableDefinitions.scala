@@ -56,7 +56,7 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
     def toContacts: Contact = Contact(id,client_id, mobile, desc, createdAt, updatedAt)
   }
 
-  class Contacts(tag: Tag) extends Table[DBContact](tag, "contacts"){
+  class Contacts(tag: Tag) extends Table[DBContact ](tag, "contacts"){
     def id            = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def client_id     = column[Int]("client_id")
     def mobile        = column[String]("mobile")

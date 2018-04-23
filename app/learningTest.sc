@@ -1,19 +1,13 @@
-val doubleEvens: PartialFunction[Int, Int] =
-  new PartialFunction[Int, Int] {
-    //States that this partial function will take on the task
-    def isDefinedAt(x: Int) = x % 2 == 0
+5+5
 
-    //What we do if this partial function matches
-    def apply(v1: Int) = v1 * 2
-  }
+import org.joda.time.{DateTime, Seconds}
 
-val tripleOdds: PartialFunction[Int, Int] = new PartialFunction[Int, Int] {
-  def isDefinedAt(x: Int) = x % 2 != 0
 
-  def apply(v1: Int) = v1 * 3
-}
 
-val whatToDo = doubleEvens orElse tripleOdds //Here we chain the partial functions together
+var a1 = "2018-04-23 18:33:29.735000 +04:00"
+var t1 = DateTime.parse(a1).toDateTime
+var a2 = "2018-04-23 18:37:58.932000 +04:00"
+var t2 = DateTime.parse(a2).toDateTime
 
-whatToDo(3)
-whatToDo(4)
+Seconds.secondsBetween(t1,t2).getSeconds
+
