@@ -81,7 +81,7 @@ class QuestionController @Inject()(
     }
     if (num>=0){
       var pageNumber = if(num<=0) 0 else num-1
-      thisService.getByPage(pageNumber).map(r=>{
+      thisService.fbQuizByPage(id,pageNumber).map(r=>{
         val (seq,t) = r
         Ok(Json.obj("data"->seq,"totalpagecount"->t))
       })
