@@ -22,6 +22,7 @@ trait QuestionService {
   def update(id: Int, updateForm:UpdateFormQuestion)  :Future[Int]
   def findByID(id: Int)                               :Future[Option[Question]]
   def findByQuizID(id: Int)                           :Future[Seq[Question]]
+  def fbQuizByPage(id: Int,num:Int)                   :Future[(Seq[Question],Int)]
 }
 
 class QuestionServiceImpl @Inject()(DAO: QuestionsDAO) extends QuestionService {
@@ -35,4 +36,5 @@ class QuestionServiceImpl @Inject()(DAO: QuestionsDAO) extends QuestionService {
   override def pureDeleteAll:Future[Int]                                        = DAO.pureDeleteAll
   override def findByID(id:Int):Future[Option[Question]]                        = DAO.findByID(id)
   override def findByQuizID(id:Int):Future[Seq[Question]]                       = DAO.findByQuizID(id)
+  override def fbQuizByPage(id: Int,num:Int):Future[(Seq[Question],Int)]        = DAO.fbQuizByPage(id,num)
 }

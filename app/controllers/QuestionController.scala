@@ -73,7 +73,20 @@ class QuestionController @Inject()(
   }
 
   def getByQuizID(id:Int) = silhouette.SecuredAction.async { implicit request=>
-    thisService.findByQuizID(id).map(r=>Ok(Json.toJson(r)))
+    var num:Int = -1
+    try{
+      num = request.getQueryString("page").getOrElse("-1").toInt
+    }catch{
+      case ex:NumberFormatException=>num = -1
+    }
+    if (num>=0){
+      var pageNumber = if(num<=0) 0 else num-1
+      thisService.getByPage(pageNumber).map(r=>{
+        val (seq,t) = r
+        Ok(Json.obj("data"->seq,"totalpagecount"->t))
+      })
+    }else thisService.findByQuizID(id).map(r=>Ok(Json.toJson(r)))
+
   }
 
   def Update(id: Int) = silhouette.SecuredAction.async(parse.json){ implicit request=>

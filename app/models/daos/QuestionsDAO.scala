@@ -19,6 +19,7 @@ trait QuestionsDAO {
   def update(id:Int,u: UpdateFormQuestion): Future[Int]
   def findByID        (id: Int)           : Future[Option[Question]]
   def findByQuizID    (id: Int)           : Future[Seq[Question]]
+  def fbQuizByPage    (id: Int,num:Int)   : Future[(Seq[Question],Int)]
 }
 
 class QuestionsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)  extends QuestionsDAO with DBTableDefinitions {
@@ -96,6 +97,14 @@ class QuestionsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfig
   override def findByQuizID(id: Int): Future[Seq[Question]] = {
     val query  = slickQuestions.filter(f=>f.deletedAt.isEmpty && f.quizID === id).result
     db.run(query).map(_.map(r=>r.toQuestion))
+  }
+  override def fbQuizByPage(id: Int,num:Int): Future[(Seq[Question],Int)] = {
+    val q = slickQuestions.filter(f=>f.deletedAt.isEmpty && f.quizID === id).drop(resultCount*num).take(resultCount).sortBy(_.id).result
+    val t = slickQuestions.filter(f=>f.deletedAt.isEmpty && f.quizID === id).length.result
+    for {
+      res<-db.run(q)
+      all<-db.run(t)
+    }yield (res.map(_.toQuestion),calculateMaxPageNum(all))
   }
 }
 
