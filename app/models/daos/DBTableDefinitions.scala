@@ -14,7 +14,9 @@ import slick.lifted.ProvenShape.proveShapeOf
 trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
   import com.github.tototoshi.slick.PostgresJodaSupport._
   import profile.api._
-
+  //result count for per page
+  var resultCount:Int = 20
+  def calculateMaxPageNum(all:Int):Int = if (all%resultCount>0) all/resultCount+1 else all/resultCount
   //**************Client table***************************************************************************************
   case class DBClient(
                      id: Int,

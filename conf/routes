@@ -79,6 +79,7 @@ DELETE  /v1/participants/delete/:id              controllers.ParticipantControll
 DELETE  /v1/participants/pdeleteall              controllers.ParticipantController.PureDeleteAll
 DELETE  /v1/participants/pdelete/:id             controllers.ParticipantController.PureDelete(id:Int)
 GET     /v1/participants/getone/:id              controllers.ParticipantController.GetOne(id:Int)
+GET     /v1/participants/getbycategory/:id       controllers.ParticipantController.getByCategoryIdByPage(id:Int,num:Int)
 GET     /v1/participants/getbycategory/:id       controllers.ParticipantController.getByCategoryID(id:Int)
 PUT     /v1/participants/update/:id              controllers.ParticipantController.Update(id: Int)
 

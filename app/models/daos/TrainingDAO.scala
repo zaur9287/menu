@@ -9,14 +9,15 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[TrainingsDAOImpl])
 trait TrainingsDAO {
-  def get: Future[Seq[Training]]
-  def create(row: Training): Future[Option[Training]]
-  def pureDelete(id:Int): Future[Int]
-  def pureDeleteAll: Future[Int]
-  def delete(selectedID:Int): Future[Int]
-  def deleteAll: Future[Int]
-  def update(id:Int,updateForm: UpdateFormTraining): Future[Int]
-  def findByID(id: Int): Future[Option[Training]]
+  def get                                 : Future[Seq[Training]]
+  def getByPage       (num:Int)           : Future[(Seq[Training],Int)]
+  def create          (row: Training)     : Future[Option[Training]]
+  def pureDelete      (id:Int)            : Future[Int]
+  def pureDeleteAll                       : Future[Int]
+  def delete          (selectedID:Int)    : Future[Int]
+  def deleteAll                           : Future[Int]
+  def update          (id:Int,u: UpdateFormTraining): Future[Int]
+  def findByID        (id: Int)           : Future[Option[Training]]
 }
 
 class TrainingsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)  extends TrainingsDAO with DBTableDefinitions {
@@ -29,6 +30,16 @@ class TrainingsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfig
       r.map(_.toTraining).sortBy(_.id)
     )
   }
+
+  override def getByPage(num: Int):Future[(Seq[Training],Int)] = {
+    val q = slickTrainings.filter(r => r.deletedAt.isEmpty).drop(resultCount*num).take(resultCount).sortBy(_.id).result
+    val t = slickTrainings.filter(r => r.deletedAt.isEmpty).length.result
+    for {
+      res<-db.run(q)
+      all<-db.run(t)
+    }yield (res.map(_.toTraining),calculateMaxPageNum(all))
+  }
+
 
   override def create(row: Training): Future[Option[Training]] = {
     val result = for{
@@ -60,10 +71,10 @@ class TrainingsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfig
     affectedRowsCount
   }
 
-  override  def update(id:Int,updateForm: UpdateFormTraining): Future[Int] = {
+  override  def update(id:Int,u: UpdateFormTraining): Future[Int] = {
     val updateQuery = slickTrainings.filter(c => c.id === id && c.deletedAt.isEmpty)
       .map(c => (c.name, c.updatedAt))
-      .update((updateForm.name, DateTime.now))
+      .update((u.name, DateTime.now))
     db.run(updateQuery)
   }
 

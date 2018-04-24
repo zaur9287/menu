@@ -3,7 +3,7 @@ package models.services
 import com.google.inject.ImplementedBy
 import javax.inject.Inject
 
-import models.caseClasses.Category
+import models.caseClasses.{Category, Participant}
 import models.caseClasses.Category._
 import models.daos.CategoriesDAO
 
@@ -13,6 +13,7 @@ import scala.concurrent.Future
 @ImplementedBy(classOf[CategoryServiceImpl])
 trait CategoryService {
   def get                               :Future[Seq[Category]]
+  def getByPage(num:Int)                :Future[(Seq[Category],Int)]
   def create (el: Category)             :Future[Option[Category]]
   def pureDelete(id:Int)                :Future[Int]
   def pureDeleteAll                     :Future[Int]
@@ -23,13 +24,8 @@ trait CategoryService {
 }
 
 class CategoryServiceImpl @Inject()(DAO: CategoriesDAO) extends CategoryService {
-  override def get: Future[Seq[Category]] = {
-    for {
-      all <- DAO.get
-    } yield {
-      all
-    }
-  }
+  override def get: Future[Seq[Category]] = {for (all <- DAO.get) yield all}
+  override def getByPage(num: Int): Future[(Seq[Category], Int)]                = DAO.getByPage(num)
   override def create(el: Category): Future[Option[Category]]                   = DAO.create(el)
   override def delete(id:Int): Future[Int]                                      = DAO.delete(id)
   override def deleteAll: Future[Int]                                           = DAO.deleteAll

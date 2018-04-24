@@ -23,7 +23,28 @@ class CategoryController @Inject()(
 
 
   def Get = silhouette.SecuredAction.async { implicit request =>
-    thisService.get.map(r => Ok(Json.toJson(r)))
+    var num:Int = -1
+    try{
+      num = request.getQueryString("page").getOrElse("-1").toInt
+    }catch{
+      case ex:NumberFormatException=>num = -1
+    }
+    if (num>=0){
+      var pageNumber = if(num<=0) 0 else num-1
+      thisService.getByPage(pageNumber).map(r=>{
+        val (seq,t) = r
+        Ok(Json.obj("data"->seq,"totalpagecount"->t))
+      })
+    }else thisService.get.map(r => Ok(Json.toJson(r)))
+    //thisService.get.map(r => Ok(Json.toJson(r)))
+  }
+
+  def getByPage(num:Int) = silhouette.SecuredAction.async { implicit request =>
+    var pageNumber = if(num<=0) 0 else num-1
+    thisService.getByPage(pageNumber).map(r=>{
+      val (seq,t) = r
+      Ok(Json.obj("data"->seq,"totalpagecount"->t))
+    })
   }
 
   def Create = silhouette.SecuredAction.async(parse.json){ implicit request =>

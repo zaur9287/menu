@@ -6,6 +6,7 @@ import com.mohiva.play.silhouette.api.Silhouette
 import models.caseClasses.Participant
 import models.caseClasses.Participant._
 import models.services.ParticipantService
+import net.minidev.asm.ex.ConvertException
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 import play.api.mvc._
@@ -29,7 +30,19 @@ class ParticipantController @Inject()(
   }
 
   def Get = silhouette.SecuredAction.async { implicit request =>
-    thisService.get.map(r => Ok(Json.toJson(r)))
+    var num:Int = -1
+    try{
+      num = request.getQueryString("page").getOrElse("-1").toInt
+    }catch{
+      case ex:NumberFormatException=>num = -1
+    }
+    if (num>=0){
+      var pageNumber = if(num<=0) 0 else num-1
+      thisService.getByPage(pageNumber).map(r=>{
+        val (seq,t) = r
+        Ok(Json.obj("data"->seq,"totalpagecount"->t))
+      })
+    }else thisService.get.map(r => Ok(Json.toJson(r)))
   }
 
   def Create = silhouette.SecuredAction.async(parse.json){ implicit request =>
@@ -61,6 +74,16 @@ class ParticipantController @Inject()(
     val test = thisService.findByCategoryID(id)
     test.map(r=>Ok(Json.toJson(r)))
   }
+
+  def getByCategoryIdByPage(id:Int,num:Int) = silhouette.SecuredAction.async{implicit request =>
+    var pageNumber = if(num<=0) 0 else num-1
+    thisService.fcByPage(id,pageNumber).map(r=>{
+      val (seq,t) = r
+      Ok(Json.obj("data"->seq,"totalpagecount"->t))
+    })
+
+  }
+
   def Update(id: Int) = silhouette.SecuredAction.async(parse.json){ implicit request=>
     Participant.updateForm.bindFromRequest().fold(
       formWithErrors => Future(BadRequest(Json.toJson(formWithErrors.errors.map(e => Json.obj("key" -> e.key, "message" -> e.message))))),

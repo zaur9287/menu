@@ -10,13 +10,14 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[CategoriesDAOImpl])
 trait CategoriesDAO {
   def get: Future[Seq[Category]]
-  def create(row: Category): Future[Option[Category]]
-  def pureDelete(id:Int): Future[Int]
-  def pureDeleteAll: Future[Int]
-  def delete(selectedID:Int): Future[Int]
-  def deleteAll: Future[Int]
-  def update(id:Int,updateForm: UpdateFormCategory): Future[Int]
-  def findByID(id: Int): Future[Option[Category]]
+  def getByPage       (num:Int)           : Future[(Seq[Category],Int)]
+  def create          (row: Category)     : Future[Option[Category]]
+  def pureDelete      (id:Int)            : Future[Int]
+  def pureDeleteAll                       : Future[Int]
+  def delete          (selectedID:Int)    : Future[Int]
+  def deleteAll                           : Future[Int]
+  def update          (id:Int,u: UpdateFormCategory): Future[Int]
+  def findByID        (id: Int)           : Future[Option[Category]]
 }
 
 class CategoriesDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)  extends CategoriesDAO with DBTableDefinitions {
@@ -28,6 +29,15 @@ class CategoriesDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfi
     db.run(query.result).map( r =>
       r.map(_.toCategory).sortBy(_.id)
     )
+  }
+
+  override def getByPage(num: Int): Future[(Seq[Category], Int)] = {
+    val q = slickCategories.filter(r => r.deletedAt.isEmpty).drop(resultCount*num).take(resultCount).sortBy(_.id).result
+    val t = slickCategories.filter(r => r.deletedAt.isEmpty).length.result
+    for {
+      res<-db.run(q)
+      all<-db.run(t)
+    }yield (res.map(_.toCategory),calculateMaxPageNum(all))
   }
 
   override def create(row: Category): Future[Option[Category]] = {
@@ -62,10 +72,10 @@ class CategoriesDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfi
     affectedRowsCount
   }
 
-  override  def update(id:Int,updateForm: UpdateFormCategory): Future[Int] = {
+  override  def update(id:Int,u: UpdateFormCategory): Future[Int] = {
     val updateQuery = slickCategories.filter(c => c.id === id && c.deletedAt.isEmpty)
       .map(c => (c.name, c.updatedAt))
-      .update((updateForm.name, DateTime.now))
+      .update((u.name, DateTime.now))
     db.run(updateQuery)
   }
 

@@ -10,17 +10,18 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[QuizzesDAOImpl])
 trait QuizzesDAO {
   def get: Future[Seq[Quiz]]
-  def getQuestions(id:Int): Future[Option[(Question,Seq[Answer])]]
-  def create(row: Quiz): Future[Option[Quiz]]
-  def pureDelete(id:Int): Future[Int]
-  def pureDeleteAll: Future[Int]
-  def delete(selectedID:Int): Future[Int]
-  def deleteAll: Future[Int]
-  def update(id:Int,updateForm: UpdateFormQuiz): Future[Int]
-  def findBySearchForm(tID:Int,cID:Int): Future[Seq[Quiz]]
-  def findByID(id: Int): Future[Option[Quiz]]
-  def findByCategoryID(id: Int): Future[Seq[Quiz]]
-  def findByTrainingID(id: Int): Future[Seq[Quiz]]
+  def getByPage       (num:Int)           : Future[(Seq[Quiz],Int)]
+  def getQuestions    (id:Int)            : Future[Option[(Question,Seq[Answer])]]
+  def create          (row: Quiz)         : Future[Option[Quiz]]
+  def pureDelete      (id:Int)            : Future[Int]
+  def pureDeleteAll                       : Future[Int]
+  def delete          (selectedID:Int)    : Future[Int]
+  def deleteAll                           : Future[Int]
+  def update          (id:Int,u: UpdateFormQuiz): Future[Int]
+  def findBySearchForm(tID:Int,cID:Int)   : Future[Seq[Quiz]]
+  def findByID        (id: Int)           : Future[Option[Quiz]]
+  def findByCategoryID(id: Int)           : Future[Seq[Quiz]]
+  def findByTrainingID(id: Int)           : Future[Seq[Quiz]]
 }
 
 class QuizzesDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)  extends QuizzesDAO with DBTableDefinitions {
@@ -33,6 +34,15 @@ class QuizzesDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigPr
       r.map(_.toQuiz).sortBy(_.id)
     )
   }
+  override def getByPage(num: Int):Future[(Seq[Quiz],Int)] = {
+    val q = slickQuizzes.filter(r => r.deletedAt.isEmpty).drop(resultCount*num).take(resultCount).sortBy(_.id).result
+    val t = slickQuizzes.filter(r => r.deletedAt.isEmpty).length.result
+    for {
+      res<-db.run(q)
+      all<-db.run(t)
+    }yield (res.map(_.toQuiz),calculateMaxPageNum(all))
+  }
+
   override def getQuestions(id:Int): Future[Option[(Question,Seq[Answer])]] = {
     val q = slickQuestions.filter(f=>f.quizID === id && f.deletedAt.isEmpty)
       .joinLeft(slickAnswers.filter(_.deletedAt.isEmpty)).on(_.id === _.questionID).sortBy(_._2.map(r=>r.id))
@@ -75,10 +85,10 @@ class QuizzesDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigPr
     affectedRowsCount
   }
 
-  override  def update(id:Int,updateForm: UpdateFormQuiz): Future[Int] = {
+  override  def update(id:Int,u: UpdateFormQuiz): Future[Int] = {
     val updateQuery = slickQuizzes.filter(c => c.id === id && c.deletedAt.isEmpty)
       .map(c => (c.name,c.spiker,c.trainingID,c.categoryID, c.updatedAt))
-      .update((updateForm.name,updateForm.spiker,updateForm.trainingID,updateForm.categoryID, DateTime.now))
+      .update((u.name,u.spiker,u.trainingID,u.categoryID, DateTime.now))
     db.run(updateQuery)
   }
 

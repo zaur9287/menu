@@ -9,15 +9,16 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[QuestionsDAOImpl])
 trait QuestionsDAO {
-  def get: Future[Seq[Question]]
-  def create(row: Question): Future[Option[Question]]
-  def pureDelete(id:Int): Future[Int]
-  def pureDeleteAll: Future[Int]
-  def delete(selectedID:Int): Future[Int]
-  def deleteAll: Future[Int]
-  def update(id:Int,updateForm: UpdateFormQuestion): Future[Int]
-  def findByID(id: Int): Future[Option[Question]]
-  def findByQuizID(id: Int): Future[Seq[Question]]
+  def get                                 : Future[Seq[Question]]
+  def getByPage       (num:Int)           : Future[(Seq[Question],Int)]
+  def create          (row: Question)     : Future[Option[Question]]
+  def pureDelete      (id:Int)            : Future[Int]
+  def pureDeleteAll                       : Future[Int]
+  def delete          (selectedID:Int)    : Future[Int]
+  def deleteAll                           : Future[Int]
+  def update(id:Int,u: UpdateFormQuestion): Future[Int]
+  def findByID        (id: Int)           : Future[Option[Question]]
+  def findByQuizID    (id: Int)           : Future[Seq[Question]]
 }
 
 class QuestionsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)  extends QuestionsDAO with DBTableDefinitions {
@@ -29,6 +30,15 @@ class QuestionsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfig
     db.run(query.result).map( r =>
       r.map(_.toQuestion).sortBy(_.id)
     )
+  }
+
+  override def getByPage(num: Int): Future[(Seq[Question], Int)] = {
+    val q = slickQuestions.filter(r => r.deletedAt.isEmpty).drop(resultCount*num).take(resultCount).sortBy(_.id).result
+    val t = slickQuestions.filter(r => r.deletedAt.isEmpty).length.result
+    for {
+      res<-db.run(q)
+      all<-db.run(t)
+    }yield (res.map(_.toQuestion),calculateMaxPageNum(all))
   }
 
   override def create(row: Question): Future[Option[Question]] = {

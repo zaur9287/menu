@@ -13,7 +13,8 @@ import scala.concurrent.Future
 @ImplementedBy(classOf[TrainingServiceImpl])
 trait TrainingService {
   def get                               :Future[Seq[Training]]
-  def create (el: Training)              :Future[Option[Training]]
+  def getByPage(num:Int)                :Future[(Seq[Training],Int)]
+  def create (el: Training)             :Future[Option[Training]]
   def pureDelete(id:Int)                :Future[Int]
   def pureDeleteAll                     :Future[Int]
   def delete(id:Int)                    :Future[Int]
@@ -23,13 +24,8 @@ trait TrainingService {
 }
 
 class TrainingServiceImpl @Inject()(DAO: TrainingsDAO) extends TrainingService {
-  override def get: Future[Seq[Training]] = {
-    for {
-      all <- DAO.get
-    } yield {
-      all
-    }
-  }
+  override def get: Future[Seq[Training]] = for (  all <- DAO.get ) yield all
+  override def getByPage(num: Int): Future[(Seq[Training], Int)]                = DAO.getByPage(num)
   override def create(el: Training): Future[Option[Training]]                   = DAO.create(el)
   override def delete(id:Int): Future[Int]                                      = DAO.delete(id)
   override def deleteAll: Future[Int]                                           = DAO.deleteAll
