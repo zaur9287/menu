@@ -1,7 +1,22 @@
-val num =4
-val resultCount  =20
-val all = 406
+import org.joda.time.DateTime
 
-val test = if (all%resultCount>0) all/resultCount+1 else all/resultCount
 
+DateTime.now
+
+
+
+
+object Planets extends Enumeration {
+  val Mercury = Value
+  val Venus = Value
+  val Earth = Value
+  val Mars = Value
+  val Jupiter = Value
+  val Saturn = Value
+  val Uranus = Value
+  val Neptune = Value
+  val Pluto = Value
+}
+
+Planets.Jupiter.id
 

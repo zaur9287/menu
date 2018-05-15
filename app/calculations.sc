@@ -22,7 +22,7 @@ s
 
 val hashids = new Hashids
 var smsID=0
-val id:Int = 5
+val id:Int = 225
 var st = ""
 
 try
@@ -31,10 +31,10 @@ catch{
   case ex:ConvertException=>println("There is error")
 }
 st
-//st = "Mh"
+st = "je9"
 
 try
-  hashids.decode(st)(0)
+  hashids.decode(st)
 catch{
   case ex:ConvertException=>println("There is error")
 }
