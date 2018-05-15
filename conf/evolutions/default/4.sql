@@ -1,16 +1,15 @@
-# Countries schema
+# passwordinfo schema
 
 # --- !Ups
 
-CREATE TABLE countries (
-    id BIGSERIAL NOT NULL,
-    name varchar(255) NOT NULL,
-    description VARCHAR(255),
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
-    deleted_at TIMESTAMP WITH TIME ZONE
+CREATE TABLE passwordinfo (
+  id            BIGSERIAL PRIMARY KEY NOT NULL,
+  logininfo_id  BIGINT NOT NULL,
+  hasher        VARCHAR NOT NULL,
+  password      VARCHAR NOT NULL,
+  salt          VARCHAR
 );
 
 # --- !Downs
 
-DROP TABLE countries;
+DROP TABLE passwordinfo;

@@ -1,16 +1,14 @@
-# Companies schema
+# logininfo schema
 
 # --- !Ups
 
-CREATE TABLE companies (
-    id BIGSERIAL NOT NULL,
-    name varchar(255) NOT NULL,
-    description VARCHAR(255),
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
-    deleted_at TIMESTAMP WITH TIME ZONE
+CREATE TABLE logininfo (
+    id                  BIGSERIAL PRIMARY KEY NOT NULL,
+    providerid          VARCHAR NOT NULL,
+    providerkey         VARCHAR NOT NULL,
+    userid              VARCHAR NOT NULL
 );
 
 # --- !Downs
 
-DROP TABLE companies;
+DROP TABLE logininfo;
