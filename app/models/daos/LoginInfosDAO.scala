@@ -20,13 +20,12 @@ class LoginInfosDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfi
   import profile.api._
   import com.github.tototoshi.slick.PostgresJodaSupport._
 
-//bir sətrin yaradılmasıı və yaranmış sətrin geri qaytarılması
   override def create(currRow: LInfo): Future[Option[LInfo]] = {
     val mydb = DBLoginInfos(0,currRow.logininfo.providerID, currRow.logininfo.providerKey, currRow.userid)
     val query = slickLoginInfos.returning(slickLoginInfos) += mydb
     db.run(query).map ( r => Some(r.toLInfo) )
   }
-//id-yə görə birinin silinməsi (seçilən sətr bazan silinir.)
+
   override def delete(id:Int): Future[Int] = {
     //val selectedRow = slickLoginInfos.filter(_.providerid==id.toString)
     val selectedRow = slickLoginInfos.filter(f =>f.providerid===id.toString)
@@ -34,14 +33,14 @@ class LoginInfosDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfi
     val affectedRowsCount:Future[Int] = db.run(deleteAction)
     affectedRowsCount
   }
-//bütün sətirlər bazadan silinir.
+
   override def deleteAll: Future[Int] = {
     val selectAll = slickLoginInfos
     val deletingAllAction = selectAll.delete
     val affectedRowsCount:Future[Int] = db.run(deletingAllAction)
     affectedRowsCount
   }
-//id-yə görə birinin tapılması
+
   override def findByUserID(id:String): Future[Option[LInfo]] = {
     val query = slickLoginInfos.filter(f=>f.userid === id ).result
     db.run(query.headOption).map(_.map(_.toLInfo))

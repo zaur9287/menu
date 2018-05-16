@@ -2,7 +2,6 @@ package modules
 
 import javax.inject.Named
 
-import actors.GlobalActor
 import akka.actor.{ActorRef, ActorSystem}
 import com.google.inject.{AbstractModule, Inject}
 import play.api.Environment
