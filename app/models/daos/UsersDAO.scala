@@ -54,7 +54,6 @@ class UsersDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProv
   }
 
 
-  //göndərilmiş məlumatların update olunması. və update User sətrin geri qaytarılması
   override  def update(id:String,user: User): Future[Int] = {
     val updateQuery = slickUsers.filter(u => u.id === id)
       .map(u => (u.fullName, u.avatarURL,u.activated))
