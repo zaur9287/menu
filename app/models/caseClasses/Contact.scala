@@ -8,6 +8,7 @@ import play.api.data.Forms._
 import play.api.data.Form
 
 case class Contact (
+                     id: Int,
                      property: String,
                      value: String,
                      userID: Option[String],
@@ -18,14 +19,23 @@ case class Contact (
 
 object Contact {
   implicit val jsonFormat = Json.format[Contact]
+}
 
-//  val formMapping = mapping (
-//    "property" -> nonEmptyText,
-//    "value" -> nonEmptyText,
-//    "userID" -> optional(nonEmptyText),
-//    "companyID" -> number
-//  )
-//
-//  val form = Form(formMapping)
+case class ContactForm (
+                         property: String,
+                         value: String,
+                         userID: Option[String],
+                         companyID: Int
+                       )
+object ContactForm {
+  implicit val jsonFormat = Json.format[ContactForm]
 
+  val formMapping = mapping (
+    "property" -> nonEmptyText,
+    "value" -> nonEmptyText,
+    "userID" -> optional(nonEmptyText),
+    "companyID" -> number
+  )(ContactForm.apply)(ContactForm.unapply)
+
+  val form = Form(formMapping)
 }

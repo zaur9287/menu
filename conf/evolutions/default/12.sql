@@ -2,11 +2,9 @@
 
 # --- !Ups
 
-CREATE TABLE company(
-  id BIGSERIAL NOT NULL PRIMARY KEY ,
-  name VARCHAR NOT NULL,
-  description VARCHAR,
-  image_id INTEGER,
+CREATE TABLE role (
+  id BIGSERIAL NOT NULL PRIMARY KEY,
+  name VARCHAR,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
   deleted BOOLEAN
@@ -14,4 +12,4 @@ CREATE TABLE company(
 
 # --- !Downs
 
-DROP TABLE company;
+DROP TABLE role;

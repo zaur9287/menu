@@ -9,20 +9,29 @@ import play.api.data.Form
 
 
 case class GoodGroup(
-                       parentID: Int,
-                       name: String,
-                       imageID: Int,
-                       createdAt: DateTime,
-                       updatedAt: DateTime
-                      )
+                      id: Int,
+                      parentID: Int,
+                      name: String,
+                      imageID: Int,
+                      createdAt: DateTime,
+                      updatedAt: DateTime
+                    )
 
 object GoodGroup {
   implicit val jsonFormat = Json.format[GoodGroup]
 }
+case class GoodGroupForm(
+                          parentID: Int,
+                          name: String,
+                          imageID: Int
+                        )
 
-//val form = Form(mapping(
-//"parentID" -> number,
-//"name" -> nonEmptyText,
-//"imageID" -> number
-//)(GoodGroups.apply)(GoodGroups.unapply))
+object GoodGroupForm {
+  implicit val jsonFormat = Json.format[GoodGroupForm]
+  val form = Form(mapping(
+  "parentID" -> number,
+  "name" -> nonEmptyText,
+  "imageID" -> number
+  )(GoodGroupForm.apply)(GoodGroupForm.unapply))
 
+}

@@ -18,27 +18,29 @@ trait CompanyDAO {
 
 class CompanyDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext) extends CompanyDAO with DBTableDefinitions{
   import profile.api._
+  import com.github.tototoshi.slick.PostgresJodaSupport._
 
   override def getAll: Future[Seq[Company]] = {
-    val getQuery = slickCompanies.filter(_.deletedAt === false)
+    val getQuery = slickCompanies.filter(_.deleted === false)
     for { all <- db.run(getQuery.result).map(_.map(r => r.toCompany)) } yield all
   }
 
   override def update(companyID: Int, companyForm: CompanyForm): Future[Int] = {
-    val updateQuery = slickCompanies.filter(f => f.deletedAt === false && f.id === companyID)
-      .map(u => (u.name, u.description, u.imageID, u.updatedAt))
-      .update((companyForm.name, companyForm.description, companyForm.imageID, DateTime.now))
+    val updateQuery = slickCompanies.filter(f => f.deleted === false && f.id === companyID)
+      .map(u => (u.name, u.description, u.imageID))
+      .update((companyForm.name, companyForm.description, companyForm.imageID))
     for { updated <- db.run(updateQuery).map(r => r)} yield updated
   }
 
   override def delete(companyID: Int): Future[Int] = {
     val deleteQuery = slickCompanies.filter(_.id === companyID)
-      .map(c => (c.updatedAt, c.deletedAt)).update((DateTime.now, true))
+      .map(c => (c.updatedAt, c.deleted)).update((DateTime.now, true))
+
     for { deleted <- db.run(deleteQuery).map(r => r) } yield deleted
   }
 
   override def findByID(companyID: Int): Future[Option[Company]] = {
-    val findQuery = slickCompanies.filter(f => f.deletedAt === false && f.id === companyID)
+    val findQuery = slickCompanies.filter(f => f.deleted === false && f.id === companyID)
     for { result <- db.run(findQuery.result.headOption).map(r => if (r.isDefined) Some(r.get.toCompany) else None ) } yield result
   }
 

@@ -2,11 +2,12 @@
 
 # --- !Ups
 
-CREATE TABLE company(
+CREATE TABLE contacts(
   id BIGSERIAL NOT NULL PRIMARY KEY ,
-  name VARCHAR NOT NULL,
-  description VARCHAR,
-  image_id INTEGER,
+  property VARCHAR NOT NULL,
+  value VARCHAR,
+  users_id VARCHAR,
+  company_id VARCHAR,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
   deleted BOOLEAN
@@ -14,4 +15,4 @@ CREATE TABLE company(
 
 # --- !Downs
 
-DROP TABLE company;
+DROP TABLE contacts;

@@ -2,10 +2,14 @@
 
 # --- !Ups
 
-CREATE TABLE company(
+CREATE TABLE goods(
   id BIGSERIAL NOT NULL PRIMARY KEY ,
+  group_id INTEGER,
+  company_id INTEGER,
   name VARCHAR NOT NULL,
   description VARCHAR,
+  price DECIMAL,
+  quantity DECIMAL,
   image_id INTEGER,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -14,4 +18,4 @@ CREATE TABLE company(
 
 # --- !Downs
 
-DROP TABLE company;
+DROP TABLE goods;

@@ -8,7 +8,8 @@ import play.api.data.Forms._
 import play.api.data.Form
 
 case class Job(
-                userID: Option[String],
+                id: Int,
+                userID: String,
                 companyID: Int,
                 roleID: Int,
                 name: String,
@@ -19,14 +20,23 @@ case class Job(
 
 object Job {
   implicit val jsonFormat = Json.format[Job]
+}
 
-//  val formMapping = mapping(
-//    "userID" -> nonEmptyText,
-//    "companyID" -> number,
-//    "roleID" -> number,
-//    "name" -> nonEmptyText,
-//    "description" -> optional(nonEmptyText)
-//  )
-//
-//  val form = Form(formMapping)
+case class JobForm (
+                     userID: String,
+                     companyID: Int,
+                     roleID: Int,
+                     name: String,
+                     description: Option[String]
+                   )
+object JobForm {
+  implicit val jsonFormat = Json.format[JobForm]
+  val formMapping = mapping(
+    "userID" -> nonEmptyText,
+    "companyID" -> number,
+    "roleID" -> number,
+    "name" -> nonEmptyText,
+    "description" -> optional(nonEmptyText)
+  )(JobForm.apply)(JobForm.unapply)
+  val form = Form(formMapping)
 }

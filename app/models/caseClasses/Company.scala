@@ -10,6 +10,7 @@ import play.api.data.Form
 
 
 case class Company (
+                     id: Int,
                      name: String,
                      description: Option[String],
                      imageID: Int,
@@ -29,6 +30,7 @@ case class CompanyForm(
                       imageID: Int
                       )
 object CompanyForm {
+  implicit val jsonFormat = Json.format[CompanyForm]
   val formMapping = mapping(
     "name" -> nonEmptyText,
     "description" -> optional(nonEmptyText),

@@ -9,17 +9,21 @@ import play.api.data.Form
 
 
 case class Role(
-               name: String,
-               createdAt: DateTime,
-               updatedAt: DateTime,
+                 id: Int,
+                 name: String,
+                 createdAt: DateTime,
+                 updatedAt: DateTime,
                )
 
 object Role {
   implicit val jsonFormat = Json.format[Role]
+}
 
-//  val form = Form(mapping(
-//    "name" -> nonEmptyText
-//  ))
+case class RoleForm ( name: String)
 
-
+object RoleForm {
+  implicit val jsonFormat = Json.format[RoleForm]
+  val form = Form(mapping(
+    "name" -> nonEmptyText
+  )(RoleForm.apply)(RoleForm.unapply))
 }

@@ -99,7 +99,7 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
                     deletedAt: Boolean
                     ){
 
-  def toCompany = Company(name, description, imageID, createdAt, updatedAt)
+  def toCompany = Company(id, name, description, imageID, createdAt, updatedAt)
   }
 
   class Companies(tag: Tag) extends Table[DBCompanies](tag, "company"){
@@ -109,9 +109,9 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
     def imageID = column[Int]("image_id")
     def createdAt = column[DateTime]("created_at")
     def updatedAt = column[DateTime]("updated_at")
-    def deletedAt = column[Boolean]("deleted_at")
+    def deleted = column[Boolean]("deleted")
 
-    override def * = (id, name, description, imageID, createdAt, updatedAt, deletedAt) <> (DBCompanies.tupled, DBCompanies.unapply)
+    override def * = (id, name, description, imageID, createdAt, updatedAt, deleted) <> (DBCompanies.tupled, DBCompanies.unapply)
   }
 
   case class DBContacts(
@@ -122,9 +122,9 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
                        companyID: Int,
                        createdAt: DateTime,
                        updatedAt: DateTime,
-                       deletedAt: Boolean
+                       deleted: Boolean
                        ){
-    def toContact = Contact(property, value, userID, companyID, createdAt, updatedAt)
+    def toContact = Contact(id, property, value, userID, companyID, createdAt, updatedAt)
   }
 
  class Contacts (tag: Tag) extends Table[DBContacts](tag, "contacts"){
@@ -135,38 +135,38 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
    def companyID = column[Int]("company_id")
    def createdAt = column[DateTime]("created_at")
    def updatedAt = column[DateTime]("updated_at")
-   def deletedAt = column[Boolean]("deleted_at")
+   def deleted = column[Boolean]("deleted")
 
-   override def * = (id, property, value, userID, companyID, createdAt, updatedAt, deletedAt) <> (DBContacts.tupled, DBContacts.unapply)
+   override def * = (id, property, value, userID, companyID, createdAt, updatedAt, deleted) <> (DBContacts.tupled, DBContacts.unapply)
  }
 
 
   case class DBJobs (
                     id: Int,
-                    userID: Option[String],
+                    userID: String,
                     companyID: Int,
                     roleID: Int,
                     name: String,
                     description: Option[String],
                     createdAt: DateTime,
                     updatedAt: DateTime,
-                    deletedAt: Boolean
+                    deleted: Boolean
                   ){
-    def toJob = Job(userID, companyID, roleID, name, description, createdAt, updatedAt)
+    def toJob = Job(id, userID, companyID, roleID, name, description, createdAt, updatedAt)
   }
 
   class Jobs (tag: Tag) extends Table[DBJobs](tag, "jobs"){
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
-    def userID = column[Option[String]]("user_id")
+    def userID = column[String]("user_id")
     def companyID = column[Int]("company_id")
     def roleID = column[Int]("role_id")
     def name = column[String]("name")
     def description = column[Option[String]]("description")
     def createdAt = column[DateTime]("created_at")
     def updatedAt = column[DateTime]("updated_at")
-    def deletedAt = column[Boolean]("deleted_at")
+    def deleted = column[Boolean]("deleted")
 
-    override def * = (id, userID, companyID, roleID, name, description, createdAt, updatedAt, deletedAt) <> (DBJobs.tupled, DBJobs.unapply)
+    override def * = (id, userID, companyID, roleID, name, description, createdAt, updatedAt, deleted) <> (DBJobs.tupled, DBJobs.unapply)
   }
 
 
@@ -175,9 +175,9 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
                      name: String,
                      createdAt: DateTime,
                      updatedAt: DateTime,
-                     deletedAt: Option[DateTime]
+                     deleted: Boolean
                      ){
-    def toRole = Role(name, createdAt, updatedAt)
+    def toRole = Role(id, name, createdAt, updatedAt)
   }
 
   class Roles (tag: Tag) extends Table[DBRoles](tag, "role"){
@@ -185,9 +185,9 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
     def name = column[String]("name")
     def createdAt = column[DateTime]("created_at")
     def updatedAt = column[DateTime]("updated_at")
-    def deletedAt = column[Option[DateTime]]("deleted_at")
+    def deleted = column[Boolean]("deleted")
 
-    override def * = (id, name, createdAt, updatedAt, deletedAt) <> (DBRoles.tupled, DBRoles.unapply)
+    override def * = (id, name, createdAt, updatedAt, deleted) <> (DBRoles.tupled, DBRoles.unapply)
   }
 
   case class DBImages(
@@ -195,16 +195,18 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
                    path: String,
                    createdAt: DateTime,
                    updatedAt: DateTime,
-                   deletedAt: Boolean
-                   )
+                   deleted: Boolean
+                   ){
+    def toImage = Image(id, path, createdAt, updatedAt)
+  }
   class Images (tag: Tag) extends Table[DBImages](tag, "images"){
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def path = column[String]("path")
     def createdAt = column[DateTime]("created_at")
     def updatedAt = column[DateTime]("updated_at")
-    def deletedAt = column[Boolean]("deleted_at")
+    def deleted = column[Boolean]("deleted")
 
-    override def * = (id, path, createdAt, updatedAt, deletedAt) <> (DBImages.tupled, DBImages.unapply)
+    override def * = (id, path, createdAt, updatedAt, deleted) <> (DBImages.tupled, DBImages.unapply)
   }
 
   case class DBTables (
@@ -215,9 +217,9 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
                       imageID: Int,
                       createdAt: DateTime,
                       updatedAt: DateTime,
-                      deletedAt: Boolean
+                      deleted: Boolean
                       ){
-    def toTable = Table_(companyID, name, description, imageID, createdAt, updatedAt)
+    def toTable = Table_(id, companyID, name, description, imageID, createdAt, updatedAt)
   }
 
   class Tables (tag: Tag) extends Table[DBTables](tag, "table"){
@@ -228,9 +230,9 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
     def imageID = column[Int]("image_id")
     def createdAt = column[DateTime]("created_at")
     def updatedAt = column[DateTime]("updated_at")
-    def deletedAt = column[Boolean]("deleted_at")
+    def deleted = column[Boolean]("deleted")
 
-    override def * = (id, companyID, name, description, imageID, createdAt, updatedAt, deletedAt) <> (DBTables.tupled, DBTables.unapply)
+    override def * = (id, companyID, name, description, imageID, createdAt, updatedAt, deleted) <> (DBTables.tupled, DBTables.unapply)
   }
 
 
@@ -241,9 +243,9 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
                          imageID: Int,
                          createdAt: DateTime,
                          updatedAt: DateTime,
-                         deletedAt: Boolean
+                         deleted: Boolean
                          ){
-    def toGoodGroup = GoodGroup(parentID, name, imageID, createdAt, updatedAt)
+    def toGoodGroup = GoodGroup(id, parentID, name, imageID, createdAt, updatedAt)
   }
 
   class GoodGroups (tag: Tag) extends Table[DBGoodGroups](tag, "good_groups"){
@@ -253,9 +255,9 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
     def imageID = column[Int]("image_id")
     def createdAt = column[DateTime]("created_at")
     def updatedAt = column[DateTime]("updated_at")
-    def deletedAt = column[Boolean]("deleted_at")
+    def deleted = column[Boolean]("deleted")
 
-    override def * = (id, parentID, name, imageID, createdAt, updatedAt, deletedAt) <> (DBGoodGroups.tupled, DBGoodGroups.unapply)
+    override def * = (id, parentID, name, imageID, createdAt, updatedAt, deleted) <> (DBGoodGroups.tupled, DBGoodGroups.unapply)
   }
 
   case class DBGoods (
@@ -269,9 +271,9 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
                      imageID: Int,
                      createdAt: DateTime,
                      updatedAt: DateTime,
-                     deletedAt: Boolean
+                     deleted: Boolean
                      ){
-    def toGood = Good(groupID, companyID, name, description, price, quantity, imageID, createdAt, updatedAt)
+    def toGood = Good(id, groupID, companyID, name, description, price, quantity, imageID, createdAt, updatedAt)
   }
 
   class Goods (tag: Tag) extends Table[DBGoods](tag, "goods") {
@@ -285,9 +287,9 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
     def imageID = column[Int]("image_id")
     def createdAt = column[DateTime]("created_at")
     def updatedAt = column[DateTime]("updated_at")
-    def deletedAt = column[Boolean]("deleted_at")
+    def deleted = column[Boolean]("deleted")
 
-    override def * = (id, groupID, companyID, name, description, price, quantity, imageID, createdAt, updatedAt, deletedAt) <> (DBGoods.tupled, DBGoods.unapply)
+    override def * = (id, groupID, companyID, name, description, price, quantity, imageID, createdAt, updatedAt, deleted) <> (DBGoods.tupled, DBGoods.unapply)
   }
 
   case class DBOrder (
@@ -301,8 +303,10 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
                      status: Option[String],
                      createdAt: DateTime,
                      updatedAt: DateTime,
-                     deletedAt: Boolean
-                     )
+                     deleted: Boolean
+                     ){
+    def toOrder = Order(id, tableID, companyID, userID, goodID, price, quantity, status, createdAt, updatedAt)
+  }
   class Orders (tag: Tag) extends Table[DBOrder](tag, "order"){
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def tableID = column[Int]("table_id")
@@ -314,9 +318,9 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
     def status = column[Option[String]]("status")
     def createdAt = column[DateTime]("created_at")
     def updatedAt = column[DateTime]("updated_at")
-    def deletedAt = column[Boolean]("deleted_at")
+    def deleted = column[Boolean]("deleted")
 
-    override def * = (id, tableID, companyID, userID, goodID, price, quantity, status, createdAt, updatedAt, deletedAt) <> (DBOrder.tupled, DBOrder.unapply)
+    override def * = (id, tableID, companyID, userID, goodID, price, quantity, status, createdAt, updatedAt, deleted) <> (DBOrder.tupled, DBOrder.unapply)
   }
 
 
@@ -334,5 +338,5 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
   val slickTables = TableQuery[Tables]
   val slickGoodGroups = TableQuery[GoodGroups]
   val slickGoods = TableQuery[Goods]
-  val SlickOrders = TableQuery[Orders]
+  val slickOrders = TableQuery[Orders]
 }

@@ -2,10 +2,10 @@
 
 # --- !Ups
 
-CREATE TABLE company(
+CREATE TABLE good_groups(
   id BIGSERIAL NOT NULL PRIMARY KEY ,
+  parent_id INTEGER,
   name VARCHAR NOT NULL,
-  description VARCHAR,
   image_id INTEGER,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -14,4 +14,4 @@ CREATE TABLE company(
 
 # --- !Downs
 
-DROP TABLE company;
+DROP TABLE good_groups;

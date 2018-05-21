@@ -9,17 +9,20 @@ import play.api.data.Form
 
 
 case class Image(
-                path: String,
-                createdAt: DateTime,
-                updatedAt: DateTime,
+                  id: Int,
+                  path: String,
+                  createdAt: DateTime,
+                  updatedAt: DateTime,
                 )
 
 object Image {
   implicit val jsonFormat = Json.format[Image]
+}
 
-//  val form = Form(mapping(
-//    "path" -> nonEmptyText
-//  ))
-
-
+case class ImageForm ( path: String )
+object ImageForm {
+  implicit val jsonFormat = Json.format[ImageForm]
+  val form = Form(mapping(
+    "path" -> nonEmptyText
+  )(ImageForm.apply)(ImageForm.unapply))
 }
