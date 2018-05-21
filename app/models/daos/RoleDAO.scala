@@ -32,7 +32,7 @@ class RoleDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProvi
   }
 
   override def delete(roleID: Int): Future[Int] = {
-    val deleteQuery = slickRoles.filter(_.id === roleID)
+    val deleteQuery = slickRoles.filter(f => f.deleted === false && f.id === roleID)
       .map(c => (c.updatedAt, c.deleted)).update((DateTime.now, true))
     for { deleted <- db.run(deleteQuery).map(r => r) } yield deleted
   }

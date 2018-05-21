@@ -33,7 +33,7 @@ class TableDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProv
   }
 
   override def delete(tableID: Int): Future[Int] = {
-    val deleteQuery = slickTables.filter(_.id === tableID)
+    val deleteQuery = slickTables.filter(f => f.deleted === false && f.id === tableID)
       .map(c => (c.updatedAt, c.deleted)).update((DateTime.now, true))
     for { deleted <- db.run(deleteQuery).map(r => r) } yield deleted
   }

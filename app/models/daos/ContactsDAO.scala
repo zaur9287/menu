@@ -10,7 +10,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[ContactsDAOImpl])
 trait ContactsDAO {
   def getAll: Future[Seq[Contact]]
-  def update(contactID:Int, companyID: Int, userID: String, contactForm: ContactForm): Future[Int]
+  def update(contactID:Int, companyID: Int, userID: Option[String], contactForm: ContactForm): Future[Int]
   def delete(contactID: Int): Future[Int]
   def findByID(contactID: Int): Future[Option[Contact]]
   def create(contactForm: ContactForm): Future[Contact]
@@ -25,15 +25,23 @@ class ContactsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigP
     for { all <- db.run(getQuery.result).map(_.map(r => r.toContact)) } yield all
   }
 
-  override def update(contactID:Int, companyID: Int, userID: String, contactForm: ContactForm): Future[Int] = {
-    var updateQuery = slickContacts.filter(f => f.deleted === false && f.id ===contactID && f.companyID === companyID && f.userID === userID)
-      .map(u => (u.property, u.value, u.userID, u.companyID))
-      .update((contactForm.property, contactForm.value, contactForm.userID, contactForm.companyID))
+  override def update(contactID: Int, companyID: Int, userID: Option[String], contactForm: ContactForm): Future[Int] = {
+    var updateQuery = if (userID.isDefined) {
+      slickContacts.filter(f => f.id === contactID && f.deleted === false && f.companyID === companyID && f.userID === userID.get)
+        .map(u => (u.property, u.value, u.userID, u.companyID))
+        .update((contactForm.property, contactForm.value, contactForm.userID, contactForm.companyID))
+    }
+    else {
+      slickContacts.filter(f => f.deleted === false && f.id === contactID && f.companyID === companyID)
+        .map(u => (u.property, u.value, u.userID, u.companyID))
+        .update((contactForm.property, contactForm.value, contactForm.userID, contactForm.companyID))
+    }
+
     for { updated <- db.run(updateQuery).map(r => r)} yield updated
   }
 
   override def delete(contactID: Int): Future[Int] = {
-    val deleteQuery = slickContacts.filter(_.id === contactID)
+    val deleteQuery = slickContacts.filter(f => f.deleted === false && f.id === contactID)
       .map(c => (c.updatedAt, c.deleted)).update((DateTime.now, true))
     for { deleted <- db.run(deleteQuery).map(r => r) } yield deleted
   }

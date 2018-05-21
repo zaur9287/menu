@@ -33,7 +33,7 @@ class GoodGroupDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfig
   }
 
   override def delete(goodGroupID: Int): Future[Int] = {
-    val deleteQuery = slickGoodGroups.filter(_.id === goodGroupID)
+    val deleteQuery = slickGoodGroups.filter(f => f.deleted === false && f.id === goodGroupID)
       .map(c => (c.updatedAt, c.deleted)).update((DateTime.now, true))
     for { deleted <- db.run(deleteQuery).map(r => r) } yield deleted
   }

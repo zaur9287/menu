@@ -42,6 +42,14 @@ PUT         /v1/company/:companyID      controllers.CompanyController.update(com
 DELETE      /v1/company/:companyID      controllers.CompanyController.delete(companyID: Int)
 
 
+# contact routes
+GET         /v1/contact                                      controllers.ContactController.getAll
+POST        /v1/contact                                      controllers.ContactController.create
+GET         /v1/contact/:contactID                           controllers.ContactController.findByID(contactID: Int)
+PUT         /v1/contact/:contactID/company/:companyID        controllers.ContactController.update(contactID: Int, companyID: Int)
+DELETE      /v1/contact/:contactID                           controllers.ContactController.delete(contactID: Int)
+
+
 
 
 

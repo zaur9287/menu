@@ -33,7 +33,7 @@ class CompanyDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigPr
   }
 
   override def delete(companyID: Int): Future[Int] = {
-    val deleteQuery = slickCompanies.filter(_.id === companyID)
+    val deleteQuery = slickCompanies.filter(f => f.deleted === false && f.id === companyID)
       .map(c => (c.updatedAt, c.deleted)).update((DateTime.now, true))
 
     for { deleted <- db.run(deleteQuery).map(r => r) } yield deleted

@@ -32,7 +32,7 @@ class ImageDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProv
   }
 
   override def delete(imageID: Int): Future[Int] = {
-    val deleteQuery = slickImages.filter(_.id === imageID)
+    val deleteQuery = slickImages.filter(f => f.deleted === false && f.id === imageID)
       .map(c => (c.updatedAt, c.deleted)).update((DateTime.now, true))
     for { deleted <- db.run(deleteQuery).map(r => r) } yield deleted
   }
