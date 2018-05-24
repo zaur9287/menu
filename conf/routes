@@ -50,12 +50,54 @@ PUT         /v1/contact/:contactID/company/:companyID        controllers.Contact
 DELETE      /v1/contact/:contactID                           controllers.ContactController.delete(contactID: Int)
 
 
+# table routes
+GET         /v1/table                                   controllers.TableController.getAll
+POST        /v1/table                                   controllers.TableController.create
+GET         /v1/table/:tableID                          controllers.TableController.findByID(tableID: Int)
+PUT         /v1/table/:tableID                          controllers.TableController.update(tableID: Int)
+DELETE      /v1/table/:tableID                          controllers.TableController.delete(tableID: Int)
 
 
+# role routes
+GET         /v1/role                                  controllers.RoleController.getAll
+POST        /v1/role                                  controllers.RoleController.create
+GET         /v1/role/:roleID                          controllers.RoleController.findByID(roleID: Int)
+PUT         /v1/role/:roleID                          controllers.RoleController.update(roleID: Int)
+DELETE      /v1/role/:roleID                          controllers.RoleController.delete(roleID: Int)
 
 
+# good routes
+GET         /v1/good                                  controllers.GoodController.getAll
+POST        /v1/good                                  controllers.GoodController.create
+GET         /v1/good/:goodID                          controllers.GoodController.findByID(goodID: Int)
+PUT         /v1/good/:goodID                          controllers.GoodController.update(goodID: Int)
+DELETE      /v1/good/:goodID                          controllers.GoodController.delete(goodID: Int)
 
 
+# job routes
+GET         /v1/job                                  controllers.JobController.getAll
+POST        /v1/job                                  controllers.JobController.create
+GET         /v1/job/:jobID                           controllers.JobController.findByID(jobID: Int)
+PUT         /v1/job/:jobID                           controllers.JobController.update(jobID: Int)
+DELETE      /v1/job/:jobID                           controllers.JobController.delete(jobID: Int)
 
+
+# goodGroup routes
+GET         /v1/goodgroup                                  controllers.GoodGroupController.getAll
+POST        /v1/goodgroup                                  controllers.GoodGroupController.create
+GET         /v1/goodgroup/:goodGroupID                     controllers.GoodGroupController.findByID(goodGroupID: Int)
+PUT         /v1/goodgroup/:goodGroupID                     controllers.GoodGroupController.update(goodGroupID: Int)
+DELETE      /v1/goodgroup/:goodGroupID                     controllers.GoodGroupController.delete(goodGroupID: Int)
+
+
+# order routes
+GET         /v1/order                                   controllers.OrderController.getAll
+POST        /v1/order                                   controllers.OrderController.create
+GET         /v1/order/:orderID                          controllers.OrderController.findByID(orderID: Int)
+PUT         /v1/order/:orderID                          controllers.OrderController.update(orderID: Int)
+DELETE      /v1/order/:orderID                          controllers.OrderController.delete(orderID: Int)
+
+# image routes
+GET         /v1/image                                  controllers.ImageController.getAll
 
 

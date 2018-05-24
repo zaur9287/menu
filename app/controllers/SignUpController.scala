@@ -14,6 +14,7 @@ import com.mohiva.play.silhouette.impl.providers._
 import forms.SignUpForm
 import models.caseClasses.User
 import models.services.{AuthTokenDAO, UserDAO}
+import org.joda.time.DateTime
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc.{AbstractController, AnyContent, ControllerComponents, Request}
@@ -77,12 +78,14 @@ class SignUpController @Inject()(
           case None =>
             val authInfo = passwordHasherRegistry.current.hash(data.password)
             val user = User(
-              userID = UUID.randomUUID(),// burada diqqetli olmaq lazim. iki defe randomUUID isledilme ehtimali var.
+              userID = UUID.randomUUID(),
               loginInfo = loginInfo,
               fullName = data.firstName + " " + data.lastName,
               email = data.email,
               avatarURL = None,
-              activated = false
+              activated = false,
+              createdAt = DateTime.now,
+              updatedAt = DateTime.now
             )
             for {
               avatar <- avatarService.retrieveURL(data.email)

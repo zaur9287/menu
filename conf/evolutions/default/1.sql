@@ -7,11 +7,11 @@ CREATE TABLE users (
     fullName        VARCHAR,
     email           VARCHAR,
     avatarURL       VARCHAR,
-    activated       BOOLEAN
---     description     VARCHAR(255),
---     created_at      TIMESTAMP WITH TIME ZONE NOT NULL,
---     updated_at      TIMESTAMP WITH TIME ZONE NOT NULL,
---     deleted_at      TIMESTAMP WITH TIME ZONE
+    activated       BOOLEAN,
+    description     VARCHAR,
+    created_at      TIMESTAMP WITH TIME ZONE NOT NULL,
+    updated_at      TIMESTAMP WITH TIME ZONE NOT NULL,
+    deleted         BOOLEAN
 );
 
 # --- !Downs

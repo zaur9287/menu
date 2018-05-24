@@ -23,9 +23,12 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
                       fullName: String,
                       email: String,
                       avatarURL: Option[String],
-                      activated: Boolean
+                      activated: Boolean,
+                      createdAt: DateTime,
+                      updatedAt: DateTime,
+                      deletedAt: Boolean
                     ){
-    def toUser:User = User(UUID.fromString(userID),LoginInfo("credentials",email),fullName,email,avatarURL,activated)
+    def toUser:User = User(UUID.fromString(userID), LoginInfo("credentials", email), fullName, email, avatarURL, activated, createdAt, updatedAt)
 
   }
 
@@ -34,8 +37,11 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
     def fullName    = column[String]("fullname")
     def email       = column[String]("email")
     def avatarURL   = column[Option[String]]("avatarurl")
-    def activated   = column[Boolean]       ("activated")
-    def * = (id, fullName, email, avatarURL,activated) <> (DBUser.tupled, DBUser.unapply)
+    def activated   = column[Boolean] ("activated")
+    def createdAt   = column[DateTime]("created_at")
+    def updatedAt   = column[DateTime]("updated_at")
+    def deleted     = column[Boolean]("deleted")
+    def * = (id, fullName, email, avatarURL, activated, createdAt, updatedAt, deleted) <> (DBUser.tupled, DBUser.unapply)
   }
 
   case class DBToken (
@@ -222,7 +228,7 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
     def toTable = Table_(id, companyID, name, description, imageID, createdAt, updatedAt)
   }
 
-  class Tables (tag: Tag) extends Table[DBTables](tag, "table"){
+  class Tables (tag: Tag) extends Table[DBTables](tag, "table_"){
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def companyID = column[Int]("company_id")
     def name = column[String]("name")
@@ -307,7 +313,7 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
                      ){
     def toOrder = Order(id, tableID, companyID, userID, goodID, price, quantity, status, createdAt, updatedAt)
   }
-  class Orders (tag: Tag) extends Table[DBOrder](tag, "order"){
+  class Orders (tag: Tag) extends Table[DBOrder](tag, "order_"){
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def tableID = column[Int]("table_id")
     def companyID = column[Int]("company_id")

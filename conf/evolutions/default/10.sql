@@ -2,7 +2,7 @@
 
 # --- !Ups
 
-CREATE TABLE table (
+CREATE TABLE table_ (
   id BIGSERIAL NOT NULL PRIMARY KEY ,
   company_id INTEGER NOT NULL,
   name VARCHAR,
@@ -15,4 +15,4 @@ CREATE TABLE table (
 
 # --- !Downs
 
-DROP TABLE table;
+DROP TABLE table_;

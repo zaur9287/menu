@@ -2,7 +2,7 @@
 
 # --- !Ups
 
-CREATE TABLE order (
+CREATE TABLE order_ (
   id BIGSERIAL NOT NULL PRIMARY KEY,
   table_id INTEGER,
   company_id INTEGER,
@@ -18,4 +18,4 @@ CREATE TABLE order (
 
 # --- !Downs
 
-DROP TABLE order;
+DROP TABLE order_;

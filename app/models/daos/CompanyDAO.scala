@@ -27,8 +27,8 @@ class CompanyDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigPr
 
   override def update(companyID: Int, companyForm: CompanyForm): Future[Int] = {
     val updateQuery = slickCompanies.filter(f => f.deleted === false && f.id === companyID)
-      .map(u => (u.name, u.description, u.imageID))
-      .update((companyForm.name, companyForm.description, companyForm.imageID))
+      .map(u => (u.name, u.description, u.imageID, u.updatedAt))
+      .update((companyForm.name, companyForm.description, companyForm.imageID, DateTime.now))
     for { updated <- db.run(updateQuery).map(r => r)} yield updated
   }
 
