@@ -46,8 +46,10 @@ DELETE      /v1/company/:companyID      controllers.CompanyController.delete(com
 GET         /v1/contact                                      controllers.ContactController.getAll
 POST        /v1/contact                                      controllers.ContactController.create
 GET         /v1/contact/:contactID                           controllers.ContactController.findByID(contactID: Int)
-PUT         /v1/contact/:contactID/company/:companyID        controllers.ContactController.update(contactID: Int, companyID: Int)
+PUT         /v1/contact/:contactID                           controllers.ContactController.update(contactID: Int)
 DELETE      /v1/contact/:contactID                           controllers.ContactController.delete(contactID: Int)
+GET         /v1/usercontacts/:userID                         controllers.ContactController.getUserContact(userID: String)
+GET         /v1/companycontacts/:companyID                   controllers.ContactController.getCompanyContact(companyID: Int)
 
 
 # table routes
@@ -56,6 +58,7 @@ POST        /v1/table                                   controllers.TableControl
 GET         /v1/table/:tableID                          controllers.TableController.findByID(tableID: Int)
 PUT         /v1/table/:tableID                          controllers.TableController.update(tableID: Int)
 DELETE      /v1/table/:tableID                          controllers.TableController.delete(tableID: Int)
+GET         /v1/companytables/:companyID                controllers.TableController.getCompanyTables(companyID: Int)
 
 
 # role routes
@@ -96,6 +99,7 @@ POST        /v1/order                                   controllers.OrderControl
 GET         /v1/order/:orderID                          controllers.OrderController.findByID(orderID: Int)
 PUT         /v1/order/:orderID                          controllers.OrderController.update(orderID: Int)
 DELETE      /v1/order/:orderID                          controllers.OrderController.delete(orderID: Int)
+GET         /v1/companyorders/:companyID                controllers.OrderController.getCompanyOrders(companyID: Int)
 
 # image routes
 GET         /v1/image                                  controllers.ImageController.getAll

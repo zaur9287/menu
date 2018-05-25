@@ -14,9 +14,6 @@ case class Order(
                   tableID: Int,
                   companyID: Int,
                   userID: String,
-                  goodID: Int,
-                  price: Double,
-                  quantity: Double,
                   status: Option[String],
                   createdAt: DateTime,
                   updatedAt: DateTime,
@@ -26,13 +23,21 @@ object Order {
   implicit val jsonFormat = Json.format[Order]
 }
 
+case class OrderView(
+                         id: Int,
+                         table: Table_,
+                         company: Company,
+                         user: User,
+                         status: Option[String],
+                         createdAt: DateTime,
+                         updatedAt: DateTime,
+                       )
+object OrderView{ implicit val jsonFormat = Json.format[OrderView] }
+
 case class OrderForm (
                      tableID: Int,
                      companyID: Int,
                      userID: String,
-                     goodID: Int,
-                     price: Double,
-                     quantity: Double,
                      status: Option[String]
                      )
 object OrderForm {
@@ -41,11 +46,27 @@ object OrderForm {
     "tableID" -> number,
     "companyID" -> number,
     "userID" -> nonEmptyText,
-    "goodID" -> number,
-    "price" -> of[Double],
-    "quantity" -> of[Double],
     "status" -> optional(nonEmptyText)
   )(OrderForm.apply)(OrderForm.unapply)
 
   val form = Form(formMapping)
+}
+
+case class OrderFilterForm(
+                            tableID: Option[Int],
+                            companyID: Option[Int],
+                            userID: Option[String],
+                            status: Option[String]
+                          )
+object OrderFilterForm{
+  implicit val jsonFormat = Json.format[OrderFilterForm]
+  val form = Form(
+    mapping(
+      "tableID" -> optional(number),
+      "companyID" -> optional(number),
+      "userID" -> optional(nonEmptyText),
+      "status" -> optional(nonEmptyText)
+    )(OrderFilterForm.apply)(OrderFilterForm.unapply)
+  )
+
 }

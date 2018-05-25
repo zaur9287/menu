@@ -1,7 +1,7 @@
 package models.daos
 
 import com.google.inject.{ImplementedBy, Inject}
-import models.caseClasses.{Table_, TableForm}
+import models.caseClasses.{Company, TableForm, Table_}
 import org.joda.time.DateTime
 import play.api.db.slick.DatabaseConfigProvider
 
@@ -14,6 +14,7 @@ trait TableDAO {
   def delete(tableID: Int): Future[Int]
   def findByID(tableID: Int): Future[Option[Table_]]
   def create(tableForm: TableForm): Future[Table_]
+  def getCompanyTables(companyID: Int): Future[Option[(Company, Seq[Table_])]]
 }
 
 class TableDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext) extends TableDAO with DBTableDefinitions{
@@ -48,4 +49,28 @@ class TableDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProv
     val insertQuery = slickTables.returning(slickTables) += dBTable
     for { newRow <- db.run(insertQuery).map(r => r.toTable) } yield newRow
   }
+
+  override def getCompanyTables(companyID: Int): Future[Option[(Company, Seq[Table_])]] = {
+    val query = slickTables.filter(f => f.companyID === companyID && f.deleted === false)
+      .join(slickCompanies.filter(f => f.id === companyID && f.deleted === false)).on(_.companyID === _.id).sortBy(_._1.id)
+    for {
+      tables <- db.run(query.result)
+    } yield
+      tables.groupBy(_._2).headOption.map(t =>{
+        (t._1.toCompany, t._2.map(_._1.toTable))
+      })
+  }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+

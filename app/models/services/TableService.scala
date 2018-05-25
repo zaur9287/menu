@@ -3,7 +3,7 @@ package models.services
 import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
-import models.caseClasses.{TableForm, Table_}
+import models.caseClasses.{Company, TableForm, Table_}
 import models.daos.TableDAO
 
 import scala.concurrent.Future
@@ -16,6 +16,7 @@ trait TableService {
   def update(tableID: Int, tableForm: TableForm): Future[Int]
   def findByID(tableID: Int): Future[Option[Table_]]
   def delete(tableID: Int): Future[Int]
+  def getCompanyTables(companyID: Int): Future[Option[(Company,Seq[Table_ ])]]
 }
 
 class TableServiceImpl @Inject()(tableDAO: TableDAO) extends TableService {
@@ -24,4 +25,5 @@ class TableServiceImpl @Inject()(tableDAO: TableDAO) extends TableService {
   override def update(tableID: Int, tableForm: TableForm): Future[Int] = tableDAO.update(tableID, tableForm)
   override def findByID(tableID: Int): Future[Option[Table_]] = tableDAO.findByID(tableID)
   override def delete(tableID: Int): Future[Int] = tableDAO.delete(tableID)
+  override def getCompanyTables(companyID: Int): Future[Option[(Company, Seq[Table_])]] = tableDAO.getCompanyTables(companyID)
 }

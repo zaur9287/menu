@@ -84,7 +84,7 @@ class SignInController @Inject()(
               }.flatMap { authenticator =>
                 silhouette.env.eventBus.publish(LoginEvent(user, request))
                 silhouette.env.authenticatorService.init(authenticator).flatMap { v =>
-                  Future(Ok(Json.obj("token"->v)))
+                  Future(Ok(Json.toJson(v)))
                 }
               }
             case None => Future.failed(new IdentityNotFoundException("Couldn't find user"))

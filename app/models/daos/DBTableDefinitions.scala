@@ -125,7 +125,7 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
                        property: String,
                        value: String,
                        userID: Option[String],
-                       companyID: Int,
+                       companyID: Option[Int],
                        createdAt: DateTime,
                        updatedAt: DateTime,
                        deleted: Boolean
@@ -138,7 +138,7 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
    def property = column[String]("property")
    def value = column[String]("value")
    def userID = column[Option[String]]("user_id")
-   def companyID = column[Int]("company_id")
+   def companyID = column[Option[Int]]("company_id")
    def createdAt = column[DateTime]("created_at")
    def updatedAt = column[DateTime]("updated_at")
    def deleted = column[Boolean]("deleted")
@@ -244,7 +244,7 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
 
   case class DBGoodGroups(
                          id: Int,
-                         parentID: Int,
+                         parentID: Option[Int],
                          name: String,
                          imageID: Int,
                          createdAt: DateTime,
@@ -256,7 +256,7 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
 
   class GoodGroups (tag: Tag) extends Table[DBGoodGroups](tag, "good_groups"){
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
-    def parentID = column[Int]("parent_id")
+    def parentID = column[Option[Int]]("parent_id")
     def name = column[String]("name")
     def imageID = column[Int]("image_id")
     def createdAt = column[DateTime]("created_at")
@@ -303,30 +303,24 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
                      tableID: Int,
                      companyID: Int,
                      userID: String,
-                     goodID: Int,
-                     price: Double,
-                     quantity: Double,
                      status: Option[String],
                      createdAt: DateTime,
                      updatedAt: DateTime,
                      deleted: Boolean
                      ){
-    def toOrder = Order(id, tableID, companyID, userID, goodID, price, quantity, status, createdAt, updatedAt)
+    def toOrder = Order(id, tableID, companyID, userID, status, createdAt, updatedAt)
   }
   class Orders (tag: Tag) extends Table[DBOrder](tag, "order_"){
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def tableID = column[Int]("table_id")
     def companyID = column[Int]("company_id")
     def userID = column[String]("user_id")
-    def goodID = column[Int]("good_id")
-    def price = column[Double]("price")
-    def quantity = column[Double]("quantity")
     def status = column[Option[String]]("status")
     def createdAt = column[DateTime]("created_at")
     def updatedAt = column[DateTime]("updated_at")
     def deleted = column[Boolean]("deleted")
 
-    override def * = (id, tableID, companyID, userID, goodID, price, quantity, status, createdAt, updatedAt, deleted) <> (DBOrder.tupled, DBOrder.unapply)
+    override def * = (id, tableID, companyID, userID, status, createdAt, updatedAt, deleted) <> (DBOrder.tupled, DBOrder.unapply)
   }
 
 

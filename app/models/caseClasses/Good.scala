@@ -48,3 +48,17 @@ object GoodForm {
     )(GoodForm.apply)(GoodForm.unapply)
   val form = Form(formMapping)
 }
+
+case class GoodFilterForm(
+                           groupID: Option[Int],
+                           companyID: Option[Int],
+                         )
+object GoodFilterForm {
+  implicit val jsonFormat = Json.format[GoodFilterForm]
+  val form = Form(
+    mapping(
+      "groupID" -> optional(number),
+      "companyID" -> optional(number)
+    )(GoodFilterForm.apply)(GoodFilterForm.unapply)
+  )
+}

@@ -53,4 +53,8 @@ class OrderController @Inject() (
     orderService.findByID(orderID).map(result => Ok(Json.toJson(result)))
   }
 
+  def getCompanyOrders(companyID: Int) = silhouette.SecuredAction.async { implicit request =>
+    orderService.getCompanyOrders(companyID)
+      .map(result => Ok(Json.toJson(result)))
+  }
 }

@@ -30,13 +30,13 @@ class UserServiceImpl @Inject()(usersDAO: UsersDAO) extends UserDAO {
     val pp = profile.email.toString
     usersDAO.findEmail(pp).flatMap {
       case Some(user) => // Update user with profile
-        val foundedUser = User(user.userID,profile.loginInfo,profile.fullName.get,user.email,profile.avatarURL,user.activated, user.createdAt, user.updatedAt)
-        val testuser = usersDAO.update(user.userID.toString,foundedUser)
+        val foundedUser = User(user.userID, profile.loginInfo, profile.fullName.get, user.email.toLowerCase, profile.avatarURL, user.activated, user.createdAt, user.updatedAt)
+        val testuser = usersDAO.update(user.userID.toString, foundedUser)
         Future(foundedUser)
       case None => // Insert a new user and new login info
         val newUserID = UUID.randomUUID()
-        val createdUser = usersDAO.save(User(newUserID,profile.loginInfo,profile.fullName.get,profile.email.get,profile.avatarURL,true, DateTime.now, DateTime.now))
-        val newLoginInfo = LInfo(0,LoginInfo(profile.loginInfo.providerID,profile.loginInfo.providerKey),newUserID.toString)
+        val createdUser = usersDAO.save(User(newUserID, profile.loginInfo, profile.fullName.get, profile.email.get.toLowerCase, profile.avatarURL, true, DateTime.now, DateTime.now))
+        val newLoginInfo = LInfo(0,LoginInfo(profile.loginInfo.providerID, profile.loginInfo.providerKey), newUserID.toString)
         createdUser
     }
   }

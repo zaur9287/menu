@@ -12,7 +12,7 @@ case class Contact (
                      property: String,
                      value: String,
                      userID: Option[String],
-                     companyID: Int,
+                     companyID: Option[Int],
                      createdAt: DateTime,
                      updatedAt: DateTime
                    )
@@ -25,7 +25,7 @@ case class ContactForm (
                          property: String,
                          value: String,
                          userID: Option[String],
-                         companyID: Int
+                         companyID: Option[Int]
                        )
 object ContactForm {
   implicit val jsonFormat = Json.format[ContactForm]
@@ -34,8 +34,21 @@ object ContactForm {
     "property" -> nonEmptyText,
     "value" -> nonEmptyText,
     "userID" -> optional(nonEmptyText),
-    "companyID" -> number
+    "companyID" -> optional(number)
   )(ContactForm.apply)(ContactForm.unapply)
 
   val form = Form(formMapping)
+}
+
+case class ContactFilterForm(
+                              userID: Option[String],
+                              companyID: Option[Int]
+                            )
+object ContactFilterForm{
+  implicit val jsonFormat = Json.format[ContactFilterForm]
+  val form = Form(mapping (
+    "userID" -> optional(nonEmptyText),
+    "companyID" -> optional(number)
+  )(ContactFilterForm.apply)(ContactFilterForm.unapply)
+  )
 }

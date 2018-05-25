@@ -56,6 +56,10 @@ class TableController @Inject() (
     thisService.findByID(tableID).map(result => Ok(Json.toJson(result)))
   }
 
+  def getCompanyTables(companyID: Int) = silhouette.SecuredAction.async { implicit request =>
+    thisService.getCompanyTables(companyID)
+      .map(result => Ok(Json.toJson(result)))
+  }
 }
 
 

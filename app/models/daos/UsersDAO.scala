@@ -29,7 +29,7 @@ class UsersDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProv
   val users: mutable.HashMap[UUID, User] = mutable.HashMap()
 
   override def find(loginInfo: LoginInfo) = {
-    val query  = slickUsers.filter(u=>u.email ===loginInfo.providerKey.toLowerCase).result.headOption
+    val query  = slickUsers.filter(u=>u.email.toLowerCase ===loginInfo.providerKey.toLowerCase).result.headOption
     db.run(query).map(u=>u.map(_.toUser))
   }
 
@@ -38,12 +38,12 @@ class UsersDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProv
     db.run(query.headOption).map(_.map(result => User(id, LoginInfo("", ""), result.fullName, result.email, result.avatarURL, true, result.createdAt, result.updatedAt)))
 }
   override def findEmail(email: String): Future[Option[User]] = {
-    val query = slickUsers.filter(u => u.email === email.toLowerCase).result
+    val query = slickUsers.filter(u => u.email.toLowerCase === email.toLowerCase).result
     db.run(query.headOption).map(_.map(r=>User(UUID.fromString(r.userID), LoginInfo("credentials", r.email), r.fullName, r.email, r.avatarURL, true, r.createdAt, r.updatedAt)))
 }
 
   override def save(user: User) = {
-    val dbUser  = DBUser(user.userID.toString, user.fullName, user.email, user.avatarURL, user.activated, DateTime.now, DateTime.now, false)
+    val dbUser  = DBUser(user.userID.toString, user.fullName, user.email.toLowerCase, user.avatarURL, user.activated, DateTime.now, DateTime.now, false)
     val createUserQuery = slickUsers.returning(slickUsers) += dbUser
     val createLoginInfoQuery = slickLoginInfos += DBLoginInfos(0, "credentials", user.email.toLowerCase, user.userID.toString)
     for {

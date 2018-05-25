@@ -38,12 +38,19 @@ class ContactController @Inject() (
     )
   }
 
-  def update(contactID: Int, companyID: Int) = silhouette.SecuredAction.async(parse.json) { implicit request =>
+  def update(contactID: Int) = silhouette.SecuredAction.async(parse.json) { implicit request =>
     var userID: Option[String] = None
     try{
       userID = Some(request.getQueryString("userID")).getOrElse(None)
     }catch{
       case ex: BadStringOperationException => userID = None
+    }
+    var companyID: Option[Int] = None
+    try{
+      val optionString = request.getQueryString("companyID")
+      companyID = if (optionString.isDefined) Some(optionString.get.toInt) else None
+    }catch{
+      case ex: BadStringOperationException => companyID = None
     }
 
     ContactForm.form.bindFromRequest().fold(
@@ -60,6 +67,17 @@ class ContactController @Inject() (
 
   def findByID(contactID: Int) = silhouette.SecuredAction.async { implicit request =>
     thisService.findByID(contactID).map(result => Ok(Json.toJson(result)))
+  }
+
+  def getUserContact(userID: String) = silhouette.SecuredAction.async { implicit request =>
+    thisService.getUserContact(userID)
+      .map(result => Ok(Json.toJson(result)))
+  }
+
+  def getCompanyContact(companyID: Int) = silhouette.SecuredAction.async {implicit request =>
+    thisService.getCompanyContact(companyID)
+      .map(result => Ok(Json.toJson(result)))
+
   }
 
 }

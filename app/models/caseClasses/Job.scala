@@ -40,3 +40,20 @@ object JobForm {
   )(JobForm.apply)(JobForm.unapply)
   val form = Form(formMapping)
 }
+
+case class JobFilterForm(
+                          userID: Option[String],
+                          companyID: Option[Int],
+                          roleID: Option[Int]
+                        )
+object JobFilterForm{
+  implicit val jsonFormat = Json.format[JobFilterForm]
+
+  val form = Form(
+    mapping(
+      "userID" -> optional(nonEmptyText),
+      "companyID" -> optional(number),
+      "roleID" -> optional(number)
+    )(JobFilterForm.apply)(JobFilterForm.unapply)
+  )
+}
