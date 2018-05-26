@@ -51,7 +51,7 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
                       )
 
   class Tokens(tag: Tag) extends Table[DBToken](tag, "tokens") {
-    def id          = column[String]("id", O.PrimaryKey, O.AutoInc)
+    def id          = column[String]("id", O.PrimaryKey)
     def userID      = column[String]("userid")
     def expiry      = column[DateTime]("expiry")
     def * = (id, userID, expiry) <> (DBToken.tupled, DBToken.unapply)

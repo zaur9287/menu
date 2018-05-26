@@ -20,25 +20,37 @@ trait TokensDAO {
 }
 
 class TokensDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)  extends TokensDAO with DBTableDefinitions {
-  val tokens: mutable.HashMap[UUID, AuthToken] = mutable.HashMap()
+  import profile.api._
+  import com.github.tototoshi.slick.PostgresJodaSupport._
 
-  def find(id: UUID) = Future.successful(tokens.get(id))
-
-  def findExpired(dateTime: DateTime) = Future.successful {
-    tokens.filter {
-      case (_, token) =>
-        token.expiry.isBefore(dateTime)
-    }.values.toSeq
+  def find(id: UUID) = {
+    val query = slickTokens.filter(_.id === id.toString)
+    db.run(query.result.headOption).map(r =>
+      if(r.isDefined)
+        Some(AuthToken(UUID.fromString(r.get.ID), UUID.fromString(r.get.userID), r.get.expiry))
+      else
+        None
+    )
   }
+
+  def findExpired(dateTime: DateTime) = {
+    val query = slickTokens.filter(_.expiry < dateTime)
+    for {
+      seq <- db.run(query.result)
+    } yield seq.map(r => AuthToken(UUID.fromString(r.ID), UUID.fromString(r.userID), r.expiry))
+  }
+
   def save(token: AuthToken) = {
-    tokens += (token.id -> token)
-    Future.successful(token)
+    val dBToken = DBToken(token.id.toString, token.userID.toString, token.expiry)
+    val insertQuery = slickTokens.returning(slickTokens) += dBToken
+    db.run(insertQuery).map(r => token)
   }
+
   def remove(id: UUID) = {
-    tokens -= id
+    val query = slickTokens.filter(_.id === id.toString)
+    db.run(query.delete)
     Future.successful(())
   }
 
 }
-
 

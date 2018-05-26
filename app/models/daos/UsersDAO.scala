@@ -35,7 +35,7 @@ class UsersDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProv
 
   override def find(id: UUID): Future[Option[User]] = {
     val query = slickUsers.filter(u => u.id === id.toString).result
-    db.run(query.headOption).map(_.map(result => User(id, LoginInfo("", ""), result.fullName, result.email, result.avatarURL, true, result.createdAt, result.updatedAt)))
+    db.run(query.headOption).map(_.map(result => User(id, LoginInfo("credentials", result.email), result.fullName, result.email, result.avatarURL, true, result.createdAt, result.updatedAt)))
 }
   override def findEmail(email: String): Future[Option[User]] = {
     val query = slickUsers.filter(u => u.email.toLowerCase === email.toLowerCase).result
