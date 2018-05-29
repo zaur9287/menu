@@ -49,11 +49,23 @@ class CompanyController @Inject() (
   }
 
   def delete(companyID: Int) = silhouette.SecuredAction.async { implicit request =>
-    thisService.delete(companyID).map(result => Ok(Json.toJson(result)))
+    thisService.delete(companyID)
+      .map(result => Ok(Json.toJson(result)))
   }
 
   def findByID(companyID: Int) = silhouette.SecuredAction.async { implicit request =>
-    thisService.findByID(companyID).map(result => Ok(Json.toJson(result)))
+    thisService.findByID(companyID)
+      .map(result => Ok(Json.toJson(result)))
+  }
+
+  def getCompanyUsers(companyID: Int) = silhouette.SecuredAction.async { implicit request =>
+    thisService.getCompanyUsers(companyID)
+      .map(result => Ok(Json.toJson(result)))
+  }
+
+  def getCompanyContacts(companyID: Int) = silhouette.SecuredAction.async { implicit request =>
+    thisService.getCompanyContacts(companyID)
+      .map(result => Ok(Json.toJson(result)))
   }
 
 }

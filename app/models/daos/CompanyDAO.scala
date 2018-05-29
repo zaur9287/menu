@@ -1,7 +1,7 @@
 package models.daos
 
 import com.google.inject.{ImplementedBy, Inject}
-import models.caseClasses.{Company, CompanyForm}
+import models.caseClasses.{Company, CompanyForm, Contact, User}
 import org.joda.time.DateTime
 import play.api.db.slick.DatabaseConfigProvider
 
@@ -14,6 +14,8 @@ trait CompanyDAO {
   def delete(companyID: Int): Future[Int]
   def findByID(companyID: Int): Future[Option[Company]]
   def create(companyForm: CompanyForm): Future[Company]
+  def getCompanyUsers(companyID: Int): Future[Seq[User]]
+  def getCompanyContacts(companyID: Int): Future[Seq[Contact]]
 }
 
 class CompanyDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext) extends CompanyDAO with DBTableDefinitions{
@@ -49,4 +51,20 @@ class CompanyDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigPr
     val insertQuery = slickCompanies.returning(slickCompanies) += dBCompany
     for { newRow <- db.run(insertQuery).map(r => r.toCompany) } yield newRow
   }
+
+  override def getCompanyUsers(companyID: Int): Future[Seq[User]] = {
+    val query = slickCompanies.filter(f => f.id === companyID && f.deleted === false)
+        .join(slickJobs.filter(f => f.companyID === companyID && f.deleted === false)).on(_.id === _.companyID)
+      .join(slickUsers.filter(_.deleted === false)).on(_._2.userID === _.id).sortBy(_._2.createdAt)
+    for {
+      users <- db.run(query.result).map(r => r)
+    } yield users.map(_._2.toUser)
+  }
+
+  override def getCompanyContacts(companyID: Int): Future[Seq[Contact]] = {
+    val query = slickCompanies.filter(f => f.id === companyID && f.deleted === false)
+        .join(slickContacts.filter(_.deleted === false)).on(_.id === _.companyID).sortBy(_._2.id)
+    db.run(query.result).map(_.map(_._2.toContact))
+  }
+
 }

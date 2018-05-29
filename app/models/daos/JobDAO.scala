@@ -1,7 +1,7 @@
 package models.daos
 
 import com.google.inject.{ImplementedBy, Inject}
-import models.caseClasses.{Job, JobForm}
+import models.caseClasses._
 import org.joda.time.DateTime
 import play.api.db.slick.DatabaseConfigProvider
 
@@ -9,7 +9,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[JobsDAOImpl])
 trait JobsDAO {
-  def getAll: Future[Seq[Job]]
+  def getAll(filters: JobFilterForm): Future[Seq[JobView]]
   def update(jobID:Int, jobForm: JobForm): Future[Int]
   def delete(jobID: Int): Future[Int]
   def findByID(jobID: Int): Future[Option[Job]]
@@ -20,9 +20,23 @@ class JobsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProvi
   import profile.api._
   import com.github.tototoshi.slick.PostgresJodaSupport._
 
-  override def getAll: Future[Seq[Job]] = {
-    val getQuery = slickJobs.filter(_.deleted === false)
-    for { all <- db.run(getQuery.result).map(_.map(r => r.toJob)) } yield all
+  override def getAll(filters: JobFilterForm): Future[Seq[JobView]] = {
+    var query = slickJobs.filter(_.deleted === false)
+      .join(slickUsers.filter(_.deleted === false)).on(_.userID === _.id)
+      .join(slickCompanies.filter(_.deleted === false)).on(_._1.companyID === _.id)
+      .join(slickRoles.filter(_.deleted === false)).on(_._1._1.roleID === _.id)
+      .sortBy(_._1._1._1.id)
+
+    filters.userID.foreach(f => query = query.filter(_._1._1._2.id === f))
+    filters.companyID.foreach(f => query = query.filter(_._1._2.id === f))
+    filters.roleID.foreach(f => query = query.filter(_._2.id === f))
+
+    for {
+      jobViews <- db.run(query.result).map(r => r)
+    } yield jobViews.map(jobView => {
+      val (((job, user), company), role) = jobView
+      JobView(job.id, user.toUser, company.toCompany, role.toRole, job.name, job.description, job.createdAt, job.updatedAt)
+    })
   }
 
   override def update(jobID: Int, jobForm: JobForm): Future[Int] = {

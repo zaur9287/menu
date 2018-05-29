@@ -3,7 +3,7 @@ package controllers
 import javax.inject.Inject
 
 import com.mohiva.play.silhouette.api.Silhouette
-import models.caseClasses.OrderForm
+import models.caseClasses.{OrderFilterForm, OrderForm}
 import models.services.OrderService
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, ControllerComponents}
@@ -23,8 +23,13 @@ class OrderController @Inject() (
                                 orderService: OrderService
                                 ) extends AbstractController(cc) {
 
-  def getAll = silhouette.SecuredAction.async { implicit request =>
-    orderService.getAll.map(r => Ok(Json.toJson(r)))
+  def getAll = silhouette.SecuredAction.async(parse.json) { implicit request =>
+    OrderFilterForm.form.bindFromRequest().fold(
+      hasErrors => Future(BadRequest(Json.toJson(hasErrors.errors.map(e => Json.obj("key" -> e.key, "message" -> e.message))))),
+      data =>
+        orderService.getAll(data)
+          .map(r => Ok(Json.toJson(r)))
+    )
   }
 
   def create = silhouette.SecuredAction.async(parse.json) { implicit request =>

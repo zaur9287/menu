@@ -18,9 +18,19 @@ case class Job(
                 updatedAt: DateTime
               )
 
-object Job {
-  implicit val jsonFormat = Json.format[Job]
-}
+object Job {implicit val jsonFormat = Json.format[Job]}
+
+case class JobView(
+                    id: Int,
+                    user: User,
+                    company: Company,
+                    role: Role,
+                    name: String,
+                    description: Option[String],
+                    createdAt: DateTime,
+                    updatedAt: DateTime
+                  )
+object JobView {implicit val jsonFormat = Json.format[JobView]}
 
 case class JobForm (
                      userID: String,

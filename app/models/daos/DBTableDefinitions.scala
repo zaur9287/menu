@@ -324,6 +324,24 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
   }
 
 
+  case class DBOrderDetails(
+                         id: Int,
+                         orderID: Int,
+                         goodID: Int,
+                         price: Double,
+                         quantity: Double
+                         )
+
+  class OrderDetails (tag: Tag) extends Table[DBOrderDetails](tag, "order_details") {
+    def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
+    def orderID = column[Int]("order_id")
+    def goodID = column[Int]("good_id")
+    def price = column[Double]("price")
+    def quantity = column[Double]("quantity")
+
+    def * = (id, orderID, goodID, price, quantity) <> (DBOrderDetails.tupled, DBOrderDetails.unapply)
+  }
+
 
   val slickUsers = TableQuery[Users]
   val slickLoginInfos = TableQuery[LoginInfos]
@@ -339,4 +357,5 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
   val slickGoodGroups = TableQuery[GoodGroups]
   val slickGoods = TableQuery[Goods]
   val slickOrders = TableQuery[Orders]
+  val slickOrderDetails = TableQuery[OrderDetails]
 }

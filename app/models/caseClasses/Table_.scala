@@ -15,7 +15,7 @@ case class Table_(
                    description: Option[String],
                    imageID: Int,
                    createdAt: DateTime,
-                   updatedAt: DateTime,
+                   updatedAt: DateTime
                  )
 
 object Table_ {

@@ -3,7 +3,7 @@ package controllers
 import javax.inject.Inject
 
 import com.mohiva.play.silhouette.api.Silhouette
-import models.caseClasses.JobForm
+import models.caseClasses.{JobFilterForm, JobForm}
 import play.api.mvc.{AbstractController, ControllerComponents}
 import utils.auth.DefaultEnv
 import models.services.JobService
@@ -24,8 +24,13 @@ class JobController @Inject() (
                               jobService: JobService
                               ) extends AbstractController(cc) {
 
-  def getAll = silhouette.SecuredAction.async { implicit request =>
-    jobService.getAll.map(r => Ok(Json.toJson(r)))
+  def getAll = silhouette.SecuredAction.async(parse.json) { implicit request =>
+    JobFilterForm.form.bindFromRequest().fold(
+      hasErrors => Future(BadRequest(Json.toJson(hasErrors.errors.map(e => Json.obj("key"->e.key, "message"->e.message))))),
+      data =>
+        jobService.getAll(data)
+          .map(r => Ok(Json.toJson(r)))
+    )
   }
 
   def create = silhouette.SecuredAction.async(parse.json) { implicit request =>
