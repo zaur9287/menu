@@ -20,7 +20,9 @@ case class User(
                   avatarURL: Option[String],
                   activated: Boolean,
                   createdAt: DateTime,
-                  updatedAt: DateTime
+                  updatedAt: DateTime,
+                  companyID: Int,
+                  owner: Boolean
                  )extends Identity
 
 object User {

@@ -18,7 +18,7 @@ trait UsersDAO {
   def find(userID: UUID): Future[Option[User]]
   def findEmail(email: String): Future[Option[User]]
   def save(user: User): Future[User]
-  def update(userID: String,user: User): Future[Int]
+  def update(userID: UUID, user: User): Future[Int]
 }
 
 class UsersDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)  extends UsersDAO with DBTableDefinitions {
@@ -29,21 +29,25 @@ class UsersDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProv
   val users: mutable.HashMap[UUID, User] = mutable.HashMap()
 
   override def find(loginInfo: LoginInfo) = {
-    val query  = slickUsers.filter(u=>u.email.toLowerCase ===loginInfo.providerKey.toLowerCase).result.headOption
-    db.run(query).map(u=>u.map(_.toUser))
+    val query  = slickUsers.filter(_.email.toLowerCase === loginInfo.providerKey.toLowerCase).result.headOption
+    db.run(query).map(u => u.map(_.toUser))
   }
 
   override def find(id: UUID): Future[Option[User]] = {
-    val query = slickUsers.filter(u => u.id === id.toString).result
-    db.run(query.headOption).map(_.map(result => User(id, LoginInfo("credentials", result.email), result.fullName, result.email, result.avatarURL, true, result.createdAt, result.updatedAt)))
+    val query = slickUsers.filter(_.id === id.toString).result
+    for {
+      result <- db.run(query.headOption).map(m => m)
+    } yield result.map(result => User(id, LoginInfo("credentials", result.email), result.fullName, result.email, result.avatarURL, true, result.createdAt, result.updatedAt, result.companyID, result.owner))
 }
   override def findEmail(email: String): Future[Option[User]] = {
-    val query = slickUsers.filter(u => u.email.toLowerCase === email.toLowerCase).result
-    db.run(query.headOption).map(_.map(r=>User(UUID.fromString(r.userID), LoginInfo("credentials", r.email), r.fullName, r.email, r.avatarURL, true, r.createdAt, r.updatedAt)))
+    val query = slickUsers.filter(_.email.toLowerCase === email.toLowerCase).result
+    for {
+      result <- db.run(query.headOption).map(r => r)
+    } yield result.map(r => User(UUID.fromString(r.userID), LoginInfo("credentials", r.email), r.fullName, r.email, r.avatarURL, true, r.createdAt, r.updatedAt, r.companyID, r.owner))
 }
 
   override def save(user: User) = {
-    val dbUser  = DBUser(user.userID.toString, user.fullName, user.email.toLowerCase, user.avatarURL, user.activated, DateTime.now, DateTime.now, false)
+    val dbUser  = DBUser(user.userID.toString, user.fullName, user.email.toLowerCase, user.avatarURL, user.activated, DateTime.now, DateTime.now, false, user.companyID, user.owner)
     val createUserQuery = slickUsers.returning(slickUsers) += dbUser
     val createLoginInfoQuery = slickLoginInfos += DBLoginInfos(0, "credentials", user.email.toLowerCase, user.userID.toString)
     for {
@@ -52,8 +56,8 @@ class UsersDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProv
     } yield  user
   }
 
-  override  def update(userID: String, user: User): Future[Int] = {
-    val updateQuery = slickUsers.filter(f => f.id === userID && f.deleted === false)
+  override  def update(userID: UUID, user: User): Future[Int] = {
+    val updateQuery = slickUsers.filter(f => f.id === userID.toString && f.deleted === false)
       .map(u => (u.fullName, u.avatarURL, u.activated, u.updatedAt))
       .update((user.fullName, user.avatarURL, user.activated, DateTime.now))
     db.run(updateQuery).map(r => r)

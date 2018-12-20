@@ -21,6 +21,6 @@ class HomeController @Inject()(
     * a path of `/`.
     */
   def index() = Action { implicit request: Request[AnyContent] =>
-    Ok(views.html.index())
+    Ok("Welcome to my project.")
   }
 }

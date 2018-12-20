@@ -24,7 +24,9 @@ class GoodController @Inject() (
                                ) extends AbstractController(cc) {
 
   def getAll = silhouette.SecuredAction.async { implicit request =>
-    goodService.getAll.map(r => Ok(Json.toJson(r)))
+    goodService.getAll.map(r => Ok(Json.toJson(r)).withHeaders(
+      "Access-Control-Allow-Origin" -> "http://localhost:3000"
+    ))
   }
 
   def create = silhouette.SecuredAction.async(parse.json) { implicit request =>

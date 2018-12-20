@@ -12,8 +12,8 @@ import com.mohiva.play.silhouette.api.services.AvatarService
 import com.mohiva.play.silhouette.api.util.PasswordHasherRegistry
 import com.mohiva.play.silhouette.impl.providers._
 import forms.SignUpForm
-import models.caseClasses.User
-import models.services.{AuthTokenDAO, UserDAO}
+import models.caseClasses.{Company, User}
+import models.services.{AuthTokenDAO, UserService}
 import org.joda.time.DateTime
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.mailer.{Email, MailerClient}
@@ -31,7 +31,7 @@ import play.api.mvc._
 class SignUpController @Inject()(
   components: ControllerComponents,
   silhouette: Silhouette[DefaultEnv],
-  userService: UserDAO,
+  userService: UserService,
   authInfoRepository: AuthInfoRepository,
   authTokenService: AuthTokenDAO,
   avatarService: AvatarService,
@@ -83,13 +83,23 @@ class SignUpController @Inject()(
               fullName = data.firstName + " " + data.lastName,
               email = data.email,
               avatarURL = None,
-              activated = false,
+              activated = true,
               createdAt = DateTime.now,
-              updatedAt = DateTime.now
+              updatedAt = DateTime.now,
+              companyID = 0,
+              owner = false
+            )
+            val company = Company(
+                id = 0,
+                name = data.companyName,
+                description = None,
+                imageID = 0,
+                createdAt = DateTime.now(),
+                updatedAt = DateTime.now()
             )
             for {
               avatar <- avatarService.retrieveURL(data.email)
-              user <- userService.save(user.copy(avatarURL = avatar))
+              user <- userService.save(user.copy(avatarURL = avatar), company)
               authInfo <- authInfoRepository.add(loginInfo, authInfo)
               authToken <- authTokenService.create(user.userID)
             } yield {

@@ -5,7 +5,7 @@ import javax.inject.Inject
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
 import forms.ForgotPasswordForm
-import models.services.{AuthTokenDAO, UserDAO}
+import models.services.{AuthTokenDAO, UserService}
 import play.api.i18n.{ I18nSupport, Messages }
 import play.api.libs.mailer.{ Email, MailerClient }
 import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents, Request }
@@ -29,7 +29,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 class ForgotPasswordController @Inject() (
                                            components: ControllerComponents,
                                            silhouette: Silhouette[DefaultEnv],
-                                           userService: UserDAO,
+                                           userService: UserService,
                                            authTokenService: AuthTokenDAO,
                                            mailerClient: MailerClient
                                          )(

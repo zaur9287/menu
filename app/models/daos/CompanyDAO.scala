@@ -14,6 +14,7 @@ trait CompanyDAO {
   def delete(companyID: Int): Future[Int]
   def findByID(companyID: Int): Future[Option[Company]]
   def create(companyForm: CompanyForm): Future[Company]
+  def createWith(company: Company): Future[Company]
   def getCompanyUsers(companyID: Int): Future[Seq[User]]
   def getCompanyContacts(companyID: Int): Future[Seq[Contact]]
 }
@@ -48,6 +49,12 @@ class CompanyDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigPr
 
   override def create(companyForm: CompanyForm): Future[Company] = {
     val dBCompany = DBCompanies(0, companyForm.name, companyForm.description, companyForm.imageID, DateTime.now(), DateTime.now(), false)
+    val insertQuery = slickCompanies.returning(slickCompanies) += dBCompany
+    for { newRow <- db.run(insertQuery).map(r => r.toCompany) } yield newRow
+  }
+
+  override def createWith(company: Company): Future[Company] = {
+    val dBCompany = DBCompanies(0, company.name, company.description, company.imageID, DateTime.now(), DateTime.now(), false)
     val insertQuery = slickCompanies.returning(slickCompanies) += dBCompany
     for { newRow <- db.run(insertQuery).map(r => r.toCompany) } yield newRow
   }

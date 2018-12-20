@@ -6,8 +6,8 @@ CREATE TABLE order_details (
   id BIGSERIAL NOT NULL PRIMARY KEY,
   order_id INTEGER,
   good_id INTEGER,
-  price DOUBLE,
-  quantity DOUBLE
+  price DOUBLE PRECISION,
+  quantity DOUBLE PRECISION
 );
 
 # --- !Downs

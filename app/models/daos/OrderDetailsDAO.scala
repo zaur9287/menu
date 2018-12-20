@@ -1,7 +1,7 @@
 package models.daos
 
 import com.google.inject.{ImplementedBy, Inject}
-import models.caseClasses.{OrderDetailForm, OrderDetailView}
+import models.caseClasses.{Order, OrderDetailForm, OrderDetailView}
 import play.api.db.slick.DatabaseConfigProvider
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -9,24 +9,23 @@ import models.services.OrderService
 
 @ImplementedBy(classOf[OrderDetailsDAOImpl])
 trait OrderDetailsDAO {
-  def createOrUpdate(orderID: Int, details: Seq[OrderDetailForm]): Future[Seq[OrderDetailView]]
+  def createOrUpdate(order: Order, details: Seq[OrderDetailForm]): Future[Seq[OrderDetailView]]
   def findByOrderID(orderID: Int): Future[Seq[OrderDetailView]]
   def deleteByOrderID(orderID: Int): Future[Int]
 }
 
-class OrderDetailsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProvider, ordersDAO: OrdersDAO)( implicit executionContext: ExecutionContext) extends OrderDetailsDAO with DBTableDefinitions {
+class OrderDetailsDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)( implicit executionContext: ExecutionContext) extends OrderDetailsDAO with DBTableDefinitions {
 
   import profile.api._
   import com.github.tototoshi.slick.PostgresJodaSupport._
 
-  override def createOrUpdate(orderID: Int, details: Seq[OrderDetailForm]): Future[Seq[OrderDetailView]] = {
-    val seqDBOrderDetails = details.map(detail => DBOrderDetails(0, orderID, detail.goodID, detail.price, detail.quantity))
+  override def createOrUpdate(order: Order, details: Seq[OrderDetailForm]): Future[Seq[OrderDetailView]] = {
+    val seqDBOrderDetails = details.map(detail => DBOrderDetails(0, order.id, detail.goodID, detail.price, detail.quantity))
     val insertQuery = slickOrderDetails ++= seqDBOrderDetails
     for {
-      deleteOrder <- deleteByOrderID(orderID)
-      orderOption <- ordersDAO.findByID(orderID)
-      inserts <- if (orderOption.isDefined) { db.run(insertQuery.transactionally) } else Future(Seq())
-      result <- findByOrderID(orderID)
+      deleteOrder <- deleteByOrderID(order.id)
+      inserts <- db.run(insertQuery.transactionally)
+      result <- findByOrderID(order.id)
     } yield  result
   }
 

@@ -6,7 +6,7 @@ import javax.inject.Inject
 
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
-import models.services.{AuthTokenDAO, UserDAO}
+import models.services.{AuthTokenDAO, UserService}
 import play.api.i18n.{ I18nSupport, Messages }
 import play.api.libs.mailer.{ Email, MailerClient }
 import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents, Request }
@@ -27,7 +27,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 class ActivateAccountController @Inject() (
                                             components: ControllerComponents,
                                             silhouette: Silhouette[DefaultEnv],
-                                            userService: UserDAO,
+                                            userService: UserService,
                                             authTokenService: AuthTokenDAO,
                                             mailerClient: MailerClient
                                           )(
@@ -74,7 +74,7 @@ class ActivateAccountController @Inject() (
     authTokenService.validate(token).flatMap {
       case Some(authToken) => userService.retrieve(authToken.userID).flatMap {
         case Some(user) if user.loginInfo.providerID == CredentialsProvider.ID =>
-          userService.save(user.copy(activated = true)).map { _ =>
+          userService.update(token, user.copy(activated = true)).map { _ =>
             Redirect(routes.SignInController.view()).flashing("success" -> Messages("account.activated"))
           }
         case _ => Future.successful(Redirect(routes.SignInController.view()).flashing("error" -> Messages("invalid.activation.link")))

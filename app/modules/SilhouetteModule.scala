@@ -24,7 +24,7 @@ import com.mohiva.play.silhouette.password.{BCryptPasswordHasher, BCryptSha256Pa
 import com.mohiva.play.silhouette.persistence.daos.{DelegableAuthInfoDAO, InMemoryAuthInfoDAO}
 import com.mohiva.play.silhouette.persistence.repositories.DelegableAuthInfoRepository
 import models.daos._
-import models.services.UserDAO
+import models.services.UserService
 import models.services.UserServiceImpl
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
@@ -36,6 +36,7 @@ import play.api.mvc.CookieHeaderEncoding
 import utils.auth.{CustomSecuredErrorHandler, CustomUnsecuredErrorHandler, DefaultEnv}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 
 /**
   * The Guice module which wires all Silhouette dependencies.
@@ -49,8 +50,8 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
     bind[Silhouette[DefaultEnv]].to[SilhouetteProvider[DefaultEnv]]
     bind[UnsecuredErrorHandler].to[CustomUnsecuredErrorHandler]
     bind[SecuredErrorHandler].to[CustomSecuredErrorHandler]
-    bind[UserDAO].to[UserServiceImpl]
-    bind[UserDAO].to[UserServiceImpl]
+    bind[UserService].to[UserServiceImpl]
+    bind[UserService].to[UserServiceImpl]
 //    bind[CacheLayer].to[PlayCacheLayer]
     bind[IDGenerator].toInstance(new SecureRandomIDGenerator())
     bind[FingerprintGenerator].toInstance(new DefaultFingerprintGenerator(false))
@@ -83,7 +84,7 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
     */
   @Provides
   def provideEnvironment(
-                          userService: UserDAO,
+                          userService: UserService,
                           authenticatorService: AuthenticatorService[JWTAuthenticator],
                           eventBus: EventBus): Environment[DefaultEnv] = {
 
@@ -229,7 +230,7 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
                                   idGenerator: IDGenerator,
                                   configuration: Configuration,
                                   clock: Clock): AuthenticatorService[JWTAuthenticator] = {
-    val settings = JWTAuthenticatorSettings(sharedSecret = configuration.get[String]("play.http.secret.key"))
+    val settings = JWTAuthenticatorSettings(sharedSecret = configuration.get[String]("play.http.secret.key"), authenticatorExpiry = 60 days)
     val encoder = new CrypterAuthenticatorEncoder(crypter)
 
     new JWTAuthenticatorService(settings, None, encoder, idGenerator, clock)

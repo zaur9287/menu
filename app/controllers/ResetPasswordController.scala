@@ -8,7 +8,7 @@ import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.util.{ PasswordHasherRegistry, PasswordInfo }
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
 import forms.ResetPasswordForm
-import models.services.{AuthTokenDAO, UserDAO}
+import models.services.{AuthTokenDAO, UserService}
 import play.api.i18n.{ I18nSupport, Messages }
 import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents, Request }
 import utils.auth.DefaultEnv
@@ -30,7 +30,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 class ResetPasswordController @Inject() (
                                           components: ControllerComponents,
                                           silhouette: Silhouette[DefaultEnv],
-                                          userService: UserDAO,
+                                          userService: UserService,
                                           authInfoRepository: AuthInfoRepository,
                                           passwordHasherRegistry: PasswordHasherRegistry,
                                           authTokenService: AuthTokenDAO

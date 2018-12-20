@@ -5,18 +5,20 @@ import play.api.data.Forms._
 
 /**
   * The form which handles the sign up process.
+  * Modified by Zaur Qabala
   */
 object SignUpForm {
 
   /**
-    * A play framework form.
+    * A modified play framework form.
     */
   val form = Form(
     mapping(
       "firstName" -> nonEmptyText,
       "lastName" -> nonEmptyText,
       "email" -> email,
-      "password" -> nonEmptyText
+      "password" -> nonEmptyText,
+      "companyName" -> nonEmptyText
     )(Data.apply)(Data.unapply)
   )
 
@@ -27,10 +29,13 @@ object SignUpForm {
     * @param lastName The last name of a user.
     * @param email The email of the user.
     * @param password The password of the user.
+    * @param companyName The name of the user company
     */
   case class Data(
                    firstName: String,
                    lastName: String,
                    email: String,
-                   password: String)
+                   password: String,
+                   companyName: String
+                 )
 }

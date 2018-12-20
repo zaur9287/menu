@@ -2,7 +2,6 @@ package models.daos
 
 import com.google.inject.{ImplementedBy, Inject}
 import models.caseClasses._
-import models.services.OrderDetailService
 import org.joda.time.DateTime
 import play.api.db.slick.DatabaseConfigProvider
 
@@ -100,7 +99,7 @@ class OrdersDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigPro
 
     for {
       order <- db.run(insertQuery).map(r => r.toOrder)
-      details <- orderDetailsDAO.createOrUpdate(order.id, orderForm.details)
+      details <- orderDetailsDAO.createOrUpdate(order, orderForm.details)
       orderView <- findByID(order.id)
     } yield orderView.get
   }

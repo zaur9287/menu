@@ -31,8 +31,8 @@ class ApplicationController @Inject() (
     *
     * @return The result to display.
     */
-  def index = silhouette.SecuredAction.async { implicit request: SecuredRequest[DefaultEnv, AnyContent] =>
-    Future.successful(Ok(views.html.home(request.identity)))
+  def index = silhouette.UnsecuredAction.async {
+    Future.successful(Ok("Welcome to my project."))
   }
 
   /**

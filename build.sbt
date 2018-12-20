@@ -16,6 +16,7 @@ resolvers := ("Atlassian Releases" at "https://maven.atlassian.com/public/") +: 
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
 libraryDependencies += guice
+libraryDependencies += filters
 libraryDependencies += ehcache
 //libraryDependencies += specs2 % Test
 libraryDependencies ++= Seq(
