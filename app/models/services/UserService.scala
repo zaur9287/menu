@@ -23,6 +23,7 @@ trait UserService extends IdentityService[User]  {
   def save(user: User, company: Company): Future[User]
   def save(profile: CommonSocialProfile): Future[User]
   def update(userID: UUID, user: User): Future[Int]
+  def delete(userID: UUID, companyID: Int): Future[Int]
 }
 class UserServiceImpl @Inject()(usersDAO: UsersDAO, companyDAO: CompanyDAO) extends UserService {
   override def update(userID: UUID, user: User): Future[Int] = usersDAO.update(userID, user)
@@ -48,5 +49,7 @@ class UserServiceImpl @Inject()(usersDAO: UsersDAO, companyDAO: CompanyDAO) exte
         createdUser
     }
   }
+
+  override def delete(userID: UUID, companyID: Int) = usersDAO.delete(userID, companyID)
 
 }

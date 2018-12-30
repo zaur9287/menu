@@ -19,6 +19,7 @@ trait UsersDAO {
   def findEmail(email: String): Future[Option[User]]
   def save(user: User): Future[User]
   def update(userID: UUID, user: User): Future[Int]
+  def delete(userID: UUID, companyID: Int): Future[Int]
 }
 
 class UsersDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)  extends UsersDAO with DBTableDefinitions {
@@ -63,8 +64,12 @@ class UsersDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProv
     db.run(updateQuery).map(r => r)
   }
 
+  override def delete(userID: UUID, companyID: Int) = {
+    val deleteQuery = slickUsers.filter(f => f.deleted === false && f.companyID === companyID && f.id === userID.toString)
 
+    for {
+      result <- db.run(deleteQuery.delete).map(m => m)
+    } yield result
+  }
 
 }
-
-

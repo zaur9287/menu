@@ -105,3 +105,7 @@ GET         /v1/companyorders/:companyID                controllers.OrderControl
 GET         /v1/image                                  controllers.ImageController.getAll
 
 
+# user routes
+GET         /v1/me                                      controllers.UserController.me
+
+

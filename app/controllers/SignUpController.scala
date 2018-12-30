@@ -15,7 +15,9 @@ import forms.SignUpForm
 import models.caseClasses.{Company, User}
 import models.services.{AuthTokenDAO, UserService}
 import org.joda.time.DateTime
+import play.api.Configuration
 import play.api.i18n.{I18nSupport, Messages}
+import play.api.libs.json.Json
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc.{AbstractController, AnyContent, ControllerComponents, Request}
 import utils.auth.DefaultEnv
@@ -36,7 +38,8 @@ class SignUpController @Inject()(
   authTokenService: AuthTokenDAO,
   avatarService: AvatarService,
   passwordHasherRegistry: PasswordHasherRegistry,
-  mailerClient: MailerClient
+  mailerClient: MailerClient,
+  configuration: Configuration,
 )(
     implicit
     assets: AssetsFinder,
@@ -61,60 +64,87 @@ class SignUpController @Inject()(
     SignUpForm.form.bindFromRequest.fold(
       form => Future.successful(BadRequest(views.html.signUp(form))),
       data => {
-        val result = Redirect(routes.SignUpController.view()).flashing("info" -> Messages("sign.up.email.sent", data.email))
-        val loginInfo = LoginInfo(CredentialsProvider.ID, data.email)
-        userService.retrieve(loginInfo).flatMap {
-          case Some(user) =>
-            val url = routes.SignInController.view().absoluteURL()
-            mailerClient.send(Email(
-              subject = Messages("email.already.signed.up.subject"),
-              from = Messages("email.from"),
-              to = Seq(data.email),
-              bodyText = Some(views.txt.emails.alreadySignedUp(user, url).body),
-              bodyHtml = Some(views.html.emails.alreadySignedUp(user, url).body)
-            ))
+        if (data.password == data.passwordConfirm) {
 
-            Future.successful(result)
-          case None =>
-            val authInfo = passwordHasherRegistry.current.hash(data.password)
-            val user = User(
-              userID = UUID.randomUUID(),
-              loginInfo = loginInfo,
-              fullName = data.firstName + " " + data.lastName,
-              email = data.email,
-              avatarURL = None,
-              activated = true,
-              createdAt = DateTime.now,
-              updatedAt = DateTime.now,
-              companyID = 0,
-              owner = false
-            )
-            val company = Company(
+          val result = Redirect(routes.SignUpController.view()).flashing("info" -> Messages("sign.up.email.sent", data.email))
+          val loginInfo = LoginInfo(CredentialsProvider.ID, data.email)
+          userService.retrieve(loginInfo).flatMap {
+            case Some(user) =>
+              val url = routes.SignInController.view().absoluteURL()
+              mailerClient.send(Email(
+                subject = Messages("email.already.signed.up.subject"),
+                from = Messages("email.from"),
+                to = Seq(data.email),
+                bodyText = Some(views.txt.emails.alreadySignedUp(user, url).body),
+                bodyHtml = Some(views.html.emails.alreadySignedUp(user, url).body)
+              ))
+
+              //Future.successful(result)
+              val c = configuration.underlying
+              silhouette.env.eventBus.publish(LoginEvent(user, request))
+              silhouette.env.authenticatorService.create(user.loginInfo).map {
+                case authenticator =>
+                  authenticator
+              }.flatMap { authenticator =>
+                silhouette.env.eventBus.publish(LoginEvent(user, request))
+                silhouette.env.authenticatorService.init(authenticator).flatMap { token =>
+                  Future(Ok(Json.toJson(token)))
+                }
+              }
+            case None =>
+              val authInfo = passwordHasherRegistry.current.hash(data.password)
+              val user = User(
+                userID = UUID.randomUUID(),
+                loginInfo = loginInfo,
+                fullName = data.fullName,
+                email = data.email,
+                avatarURL = None,
+                activated = true,
+                createdAt = DateTime.now,
+                updatedAt = DateTime.now,
+                companyID = 0,
+                owner = false
+              )
+              val company = Company(
                 id = 0,
                 name = data.companyName,
                 description = None,
                 imageID = 0,
                 createdAt = DateTime.now(),
                 updatedAt = DateTime.now()
-            )
-            for {
-              avatar <- avatarService.retrieveURL(data.email)
-              user <- userService.save(user.copy(avatarURL = avatar), company)
-              authInfo <- authInfoRepository.add(loginInfo, authInfo)
-              authToken <- authTokenService.create(user.userID)
-            } yield {
-              val url = routes.ActivateAccountController.activate(authToken.id).absoluteURL()
-              mailerClient.send(Email(
-                subject = Messages("email.sign.up.subject"),
-                from = Messages("email.from"),
-                to = Seq(data.email),
-                bodyText = Some(views.txt.emails.signUp(user, url).body),
-                bodyHtml = Some(views.html.emails.signUp(user, url).body)
-              ))
+              )
+              for {
+                avatar <- avatarService.retrieveURL(data.email)
+                user <- userService.save(user.copy(avatarURL = avatar), company)
+                authInfo <- authInfoRepository.add(loginInfo, authInfo)
+                authToken <- authTokenService.create(user.userID)
+              } yield {
+//                val url = routes.ActivateAccountController.activate(authToken.id).absoluteURL()
+//                mailerClient.send(Email(
+//                  subject = Messages("email.sign.up.subject"),
+//                  from = Messages("email.from"),
+//                  to = Seq(data.email),
+//                  bodyText = Some(views.txt.emails.signUp(user, url).body),
+//                  bodyHtml = Some(views.html.emails.signUp(user, url).body)
+//                ))
 
-              silhouette.env.eventBus.publish(SignUpEvent(user, request))
-              result
-            }
+                silhouette.env.eventBus.publish(SignUpEvent(user, request))
+
+              }
+              val c = configuration.underlying
+              silhouette.env.eventBus.publish(LoginEvent(user, request))
+              silhouette.env.authenticatorService.create(user.loginInfo).map {
+                case authenticator =>
+                  authenticator
+              }.flatMap { authenticator =>
+                silhouette.env.eventBus.publish(LoginEvent(user, request))
+                silhouette.env.authenticatorService.init(authenticator).flatMap { token =>
+                  Future(Ok(Json.toJson(token)))
+                }
+              }
+          }
+        } else {
+          Future(BadRequest(Json.obj("key" -> "", "message" -> "Confirm password error!")))
         }
       }
     )

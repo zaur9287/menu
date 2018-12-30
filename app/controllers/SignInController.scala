@@ -87,11 +87,13 @@ class SignInController @Inject()(
                   Future(Ok(Json.toJson(v)))
                 }
               }
-            case None => Future.failed(new IdentityNotFoundException("Couldn't find user"))
+            case None => Future(Unauthorized(Json.obj("key" -> "", "message" -> "Authorized failed")))
+              //Future.failed(new IdentityNotFoundException("Couldn't find user"))
           }
         }.recover {
           case _: ProviderException =>
-            Redirect(routes.SignInController.view()).flashing("error" -> Messages("invalid.credentials"))
+            BadRequest(Json.obj("key" -> "", "message" -> "ProviderException"))
+            //Redirect(routes.SignInController.view()).flashing("error" -> Messages("invalid.credentials"))
         }
       }
     )
