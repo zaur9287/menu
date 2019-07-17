@@ -28,9 +28,11 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
                       updatedAt: DateTime,
                       deletedAt: Boolean,
                       companyID: Int,
-                      owner: Boolean
+                      owner: Boolean,
+                      address: Option[String],
+                      description: Option[String]
                     ){
-    def toUser:User = User(UUID.fromString(userID), LoginInfo("credentials", email), fullName, email, avatarURL, activated, createdAt, updatedAt, companyID, owner)
+    def toUser:User = User(UUID.fromString(userID), LoginInfo("credentials", email), fullName, email, avatarURL, activated, createdAt, updatedAt, companyID, owner, address, description)
 
   }
 
@@ -42,12 +44,14 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[PostgresProfile] {
     def activated   = column[Boolean] ("activated")
     def createdAt   = column[DateTime]("created_at")
     def updatedAt   = column[DateTime]("updated_at")
-    def deleted     = column[Boolean]("deleted")
+    def deleted = column[Boolean]("deleted")
     def companyID = column[Int]("company_id")
     def owner = column[Boolean]("owner")
+    def address = column[Option[String]]("address")
+    def description = column[Option[String]]("description")
 
 
-    def * = (id, fullName, email, avatarURL, activated, createdAt, updatedAt, deleted, companyID, owner) <> (DBUser.tupled, DBUser.unapply)
+    def * = (id, fullName, email, avatarURL, activated, createdAt, updatedAt, deleted, companyID, owner, address, description) <> (DBUser.tupled, DBUser.unapply)
   }
 
   case class DBToken (

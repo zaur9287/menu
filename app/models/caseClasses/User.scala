@@ -22,7 +22,9 @@ case class User(
                   createdAt: DateTime,
                   updatedAt: DateTime,
                   companyID: Int,
-                  owner: Boolean
+                  owner: Boolean,
+                  address: Option[String],
+                  description: Option[String]
                  )extends Identity
 
 object User {
@@ -31,22 +33,22 @@ object User {
 
 
 case class UserForm (
-                    userID: String,
                     email: String,
                     fullName: String,
                     avatarURL: Option[String],
-                    activated: Boolean
+                    address: Option[String],
+                    description: Option[String]
                     )
 
 object UserForm {
   implicit val jsonFormat = Json.format[UserForm]
 
   val formMapping = mapping(
-    "userID" -> nonEmptyText,
     "email" -> nonEmptyText,
     "fullName" -> nonEmptyText,
     "avatarURL" -> optional(nonEmptyText),
-    "activated" -> boolean
+    "address" -> optional(nonEmptyText),
+    "description" -> optional(nonEmptyText),
   )(UserForm.apply)(UserForm.unapply)
 
   val form = Form(formMapping)

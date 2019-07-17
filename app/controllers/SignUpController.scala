@@ -79,7 +79,6 @@ class SignUpController @Inject()(
                 bodyHtml = Some(views.html.emails.alreadySignedUp(user, url).body)
               ))
 
-              //Future.successful(result)
               val c = configuration.underlying
               silhouette.env.eventBus.publish(LoginEvent(user, request))
               silhouette.env.authenticatorService.create(user.loginInfo).map {
@@ -103,7 +102,9 @@ class SignUpController @Inject()(
                 createdAt = DateTime.now,
                 updatedAt = DateTime.now,
                 companyID = 0,
-                owner = false
+                owner = false,
+                address = None,
+                description = None
               )
               val company = Company(
                 id = 0,
@@ -119,14 +120,6 @@ class SignUpController @Inject()(
                 authInfo <- authInfoRepository.add(loginInfo, authInfo)
                 authToken <- authTokenService.create(user.userID)
               } yield {
-//                val url = routes.ActivateAccountController.activate(authToken.id).absoluteURL()
-//                mailerClient.send(Email(
-//                  subject = Messages("email.sign.up.subject"),
-//                  from = Messages("email.from"),
-//                  to = Seq(data.email),
-//                  bodyText = Some(views.txt.emails.signUp(user, url).body),
-//                  bodyHtml = Some(views.html.emails.signUp(user, url).body)
-//                ))
 
                 silhouette.env.eventBus.publish(SignUpEvent(user, request))
 

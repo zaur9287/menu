@@ -12,8 +12,6 @@ import scala.concurrent.duration._
 
 class TasksScheduleModule extends AbstractModule with AkkaGuiceSupport {
   def configure() = {
-//    bindActor(classOf[GlobalActor], "scheduler-actor")
-//    bind(classOf[Scheduler]).asEagerSingleton()
   }
 }
 

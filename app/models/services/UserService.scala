@@ -24,7 +24,9 @@ trait UserService extends IdentityService[User]  {
   def save(profile: CommonSocialProfile): Future[User]
   def update(userID: UUID, user: User): Future[Int]
   def delete(userID: UUID, companyID: Int): Future[Int]
+  def list(companyID: Int): Future[Seq[User]]
 }
+
 class UserServiceImpl @Inject()(usersDAO: UsersDAO, companyDAO: CompanyDAO) extends UserService {
   override def update(userID: UUID, user: User): Future[Int] = usersDAO.update(userID, user)
   override def retrieve(loginInfo: LoginInfo): Future[Option[User]] =usersDAO.find(loginInfo)
@@ -39,12 +41,12 @@ class UserServiceImpl @Inject()(usersDAO: UsersDAO, companyDAO: CompanyDAO) exte
     val email = profile.email.toString
     usersDAO.findEmail(email).flatMap {
       case Some(user) => // Update user with profile
-        val foundedUser = User(user.userID, profile.loginInfo, profile.fullName.get, user.email.toLowerCase, profile.avatarURL, user.activated, user.createdAt, user.updatedAt, user.companyID, user.owner)
+        val foundedUser = User(user.userID, profile.loginInfo, profile.fullName.get, user.email.toLowerCase, profile.avatarURL, user.activated, user.createdAt, user.updatedAt, user.companyID, user.owner, user.address, user.description)
         val testuser = usersDAO.update(user.userID, foundedUser)
         Future(foundedUser)
       case None => // Insert a new user and new login info
         val newUserID = UUID.randomUUID()
-        val createdUser = usersDAO.save(User(newUserID, profile.loginInfo, profile.fullName.get, profile.email.get.toLowerCase, profile.avatarURL, true, DateTime.now, DateTime.now, 0, owner = false))
+        val createdUser = usersDAO.save(User(newUserID, profile.loginInfo, profile.fullName.get, profile.email.get.toLowerCase, profile.avatarURL, true, DateTime.now, DateTime.now, 0, owner = false, address = None, description = None))
         val newLoginInfo = LInfo(0,LoginInfo(profile.loginInfo.providerID, profile.loginInfo.providerKey), newUserID.toString)
         createdUser
     }
@@ -52,4 +54,5 @@ class UserServiceImpl @Inject()(usersDAO: UsersDAO, companyDAO: CompanyDAO) exte
 
   override def delete(userID: UUID, companyID: Int) = usersDAO.delete(userID, companyID)
 
+  override def list(companyID: Int): Future[Seq[User]] = usersDAO.list(companyID)
 }

@@ -20,6 +20,7 @@ trait UsersDAO {
   def save(user: User): Future[User]
   def update(userID: UUID, user: User): Future[Int]
   def delete(userID: UUID, companyID: Int): Future[Int]
+  def list(companyID: Int): Future[Seq[User]]
 }
 
 class UsersDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)  extends UsersDAO with DBTableDefinitions {
@@ -38,17 +39,17 @@ class UsersDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProv
     val query = slickUsers.filter(_.id === id.toString).result
     for {
       result <- db.run(query.headOption).map(m => m)
-    } yield result.map(result => User(id, LoginInfo("credentials", result.email), result.fullName, result.email, result.avatarURL, true, result.createdAt, result.updatedAt, result.companyID, result.owner))
+    } yield result.map(result => User(id, LoginInfo("credentials", result.email), result.fullName, result.email, result.avatarURL, true, result.createdAt, result.updatedAt, result.companyID, result.owner, result.address, result.description))
 }
   override def findEmail(email: String): Future[Option[User]] = {
     val query = slickUsers.filter(_.email.toLowerCase === email.toLowerCase).result
     for {
       result <- db.run(query.headOption).map(r => r)
-    } yield result.map(r => User(UUID.fromString(r.userID), LoginInfo("credentials", r.email), r.fullName, r.email, r.avatarURL, true, r.createdAt, r.updatedAt, r.companyID, r.owner))
+    } yield result.map(r => User(UUID.fromString(r.userID), LoginInfo("credentials", r.email), r.fullName, r.email, r.avatarURL, true, r.createdAt, r.updatedAt, r.companyID, r.owner, r.address, r.description))
 }
 
   override def save(user: User) = {
-    val dbUser  = DBUser(user.userID.toString, user.fullName, user.email.toLowerCase, user.avatarURL, user.activated, DateTime.now, DateTime.now, false, user.companyID, user.owner)
+    val dbUser  = DBUser(user.userID.toString, user.fullName, user.email.toLowerCase, user.avatarURL, user.activated, DateTime.now, DateTime.now, false, user.companyID, user.owner, user.address, user.description)
     val createUserQuery = slickUsers.returning(slickUsers) += dbUser
     val createLoginInfoQuery = slickLoginInfos += DBLoginInfos(0, "credentials", user.email.toLowerCase, user.userID.toString)
     for {
@@ -72,4 +73,10 @@ class UsersDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProv
     } yield result
   }
 
+  override def list(companyID: Int): Future[Seq[User]] = {
+    val query = slickUsers.filter(f => f.companyID === companyID && f.deleted === false)
+    for {
+      result <- db.run(query.result).map(_.map(m => m.toUser))
+    } yield result
+  }
 }

@@ -20,36 +20,7 @@ object AuthToken {
 
   implicit val jsonFormat = Json.format[AuthToken]
 
-//  val form = Form(
-//    tuple(
-//      "name" -> nonEmptyText,
-//      "description" -> optional(nonEmptyText)
-//    )
-//  )
+
 }
 
 
-
-//
-//object  UserForms {
-//
-//  // User update form
-//  case class UpdateUserForm(
-//                               name:String,
-//                               description: String
-//                             ){
-//    def tupled = (name, description)
-//  }
-//
-//  object UpdateUserForm {
-//    implicit val jsonFormat = Json.format[UpdateUserForm]
-//  }
-//
-//  val updateForm = Form(
-//    mapping(
-//      "name" -> text,
-//      "description" -> text
-//    )(UpdateUserForm.apply)(UpdateUserForm.unapply)
-//  )
-//
-//}

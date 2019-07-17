@@ -107,5 +107,6 @@ GET         /v1/image                                  controllers.ImageControll
 
 # user routes
 GET         /v1/me                                      controllers.UserController.me
-
+DELETE      /v1/user/:id                                controllers.UserController.delete(id: String)
+POST        /v1/user/list                               controllers.UserController.list
 
